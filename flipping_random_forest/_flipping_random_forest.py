@@ -16,7 +16,7 @@ __all__ = ['FlippingRandomForestClassifier',
             'fit_forest',
             'FlippingBaggingBase']
 
-def fit_forest(params, X, y, class_):
+def fit_forest(params, X, y, class_, sample_weight=None):
     """
     Fitting one tree of the forest
 
@@ -25,9 +25,10 @@ def fit_forest(params, X, y, class_):
         X (np.array): the independent feature vectors
         y (np.array): the dependent target values
         class_ (class): the tree class to fit
+        sample_weight (None/np.array): the sample weights
     """
     estimator = class_(**params)
-    return estimator.fit(X, y)
+    return estimator.fit(X, y, sample_weight=sample_weight)
 
 class RandomStateMixin:
     """
@@ -123,6 +124,8 @@ class FlippingBaggingBase(RandomStateMixin):
         self.flipping = flipping
         self.n_jobs = n_jobs
 
+        self.flippings_ = []
+
     def get_params(self, deep=False):
         """
         Returns the parameters of the object
@@ -217,28 +220,29 @@ class FlippingBaggingBase(RandomStateMixin):
         _ = y
         raise ValueError("fit_1 method of base class called")
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         """
         Fit the estimator
 
         Args:
             X (np.array): the feature vectors
             y (np.array): the target labels
+            sample_weight (np.array): the sample weights
 
         Returns:
             obj: the fitted estimator object
         """
+        self.estimators_ = []
+        self.flippings_ = []
+
         if self.n_jobs == 1:
-            return self.fit_1(X, y)
+            return self.fit_1(X, y, sample_weight)
 
         params = self.get_params()
         params['n_jobs'] = 1
         params['n_estimators'] = int(self.n_estimators/self.n_jobs)
 
-        forests = Parallel(n_jobs=self.n_jobs)(delayed(fit_forest)(params, X, y, class_=self.__class__) for _ in range(self.n_jobs))
-
-        self.estimators_ = []
-        self.flippings_ = []
+        forests = Parallel(n_jobs=self.n_jobs)(delayed(fit_forest)(params, X, y, self.__class__, sample_weight) for _ in range(self.n_jobs))
 
         for forest in forests:
             self.estimators_.extend(forest.estimators_)
