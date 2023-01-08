@@ -169,6 +169,8 @@ class FlippingBaggingBase(RandomStateMixin):
             max_features = int(np.round(np.sqrt(n_features))) + 1
         elif isinstance(self.max_features, int):
             max_features = self.max_features
+        elif isinstance(self.max_features, float):
+            max_features = self.max_features
 
         return max_features
 
@@ -314,7 +316,7 @@ class FlippingRandomForestClassifier(FlippingBaggingBase, ClassifierMixin):
             for class_label in class_labels:
                 X_label = X[y == class_label]
 
-                mask = np.random.choice(X_label.shape[0], X_label.shape[0], replace=True)
+                mask = self.random_state.choice(X_label.shape[0], X_label.shape[0], replace=True)
 
                 Xs.append(X_label[mask])
                 ys.append(np.repeat(class_label, X_label.shape[0]))
@@ -406,7 +408,7 @@ class FlippingRandomForestRegressor(FlippingBaggingBase, RegressorMixin):
                     bootstrap_features=False,
                     min_samples_leaf=1,
                     max_depth=None,
-                    max_features='sqrt',
+                    max_features=1.0,
                     splitter='best',
                     flipping=None,
                     n_jobs=1,
