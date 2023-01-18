@@ -4,3 +4,5 @@ scikit-learn
 joblib
 pandas
 plotly
+kaleido
+jinja2
