@@ -2,19 +2,45 @@
 This module implements the flipping random forest classifier and regressor
 """
 
+import copy
+
 import numpy as np
+import pandas as pd
 
 from joblib import Parallel, delayed
 
 from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.tree import (DecisionTreeClassifier,
                             DecisionTreeRegressor)
+from sklearn.ensemble import (RandomForestClassifier,
+                                RandomForestRegressor)
 
-__all__ = ['FlippingRandomForestClassifier',
+__all__ = ['MirroredDecisionTreeClassifier',
+            'MirroredDecisionTreeRegressor',
+            'FlippingDecisionTreeClassifier',
+            'FlippingDecisionTreeRegressor',
+            'FlippingRandomForestClassifier',
             'FlippingRandomForestRegressor',
+            'MirroredRandomForestRegressor',
+            'MirroredRandomForestClassifier',
             'RandomStateMixin',
             'fit_forest',
-            'FlippingBaggingBase']
+            'FlippingBaggingBase',
+            'mirror_tree',
+            'dummy_data']
+
+def dummy_data():
+    data = pd.DataFrame({'criminal_record': [0,  0,  1,  1],
+                         'income':          [40, 60, 40, 80],
+                         'years_in_job':    [4,  6,  6,  2],
+                         'defaulted':       [1,  0,  0,  0]})
+
+    dataset = {}
+
+    dataset['data'] = data[['criminal_record', 'income', 'years_in_job']].values
+    dataset['target'] = data['defaulted'].values
+
+    return dataset
 
 def fit_forest(params, X, y, class_, sample_weight=None):
     """
@@ -80,6 +106,401 @@ class RandomStateMixin:
         _ = deep # disabling pylint reporting
         return {'random_state': self._random_state_init}
 
+def mirror_tree(tree):
+    """
+    Mirrors an sklearn tree
+
+    Args:
+        tree (obj): the tree to mirror
+
+    Returns:
+        obj: the mirrored tree
+    """
+    new_tree = copy.deepcopy(tree)
+
+    for idx in range(len(new_tree.tree_.children_left)):
+        left = new_tree.tree_.children_left[idx]
+        right = new_tree.tree_.children_right[idx]
+
+        new_tree.tree_.children_left[idx] = right
+        new_tree.tree_.children_right[idx] = left
+
+        new_tree.tree_.threshold[idx] = (-1) * new_tree.tree_.threshold[idx]
+
+    return new_tree
+
+class MirroredDecisionTreeClassifier(ClassifierMixin):
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor of the classifier
+
+        Args:
+            args: positional arguments passed to the underlying decision trees
+            kwargs: keyword arguments passed to the underlying decision trees
+        """
+        self.args = args
+        self.kwargs = kwargs
+
+        self.tree = None
+
+    def fit(self, X, y, sample_weight=None):
+        """
+        Fits the predictor
+
+        Args:
+            X (np.array): the feature vectors
+            y (np.array): the target labels
+            sample_weight (None/np.array): the sample weights
+
+        Returns:
+            self: the fitted object
+        """
+        self.tree = DecisionTreeClassifier(*self.args, **self.kwargs)
+        self.tree.fit(X, y, sample_weight)
+        self.tree = mirror_tree(self.tree)
+
+        return self
+
+    def predict_proba(self, X):
+        """
+        Predicts the class membership probabilities
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the class membership probabilities
+        """
+        return self.tree.predict_proba(-X)
+
+    def predict(self, X):
+        """
+        Predicts the class labels
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the class labels
+        """
+        return self.tree.predict(-X)
+
+class FlippingDecisionTreeClassifier(ClassifierMixin):
+    """
+    Decision tree classifier with attribute flipping
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor of the classifier
+
+        Args:
+            args: positional arguments passed to the underlying decision trees
+            kwargs: keyword arguments passed to the underlying decision trees
+        """
+        self.args = args
+        self.kwargs = kwargs
+
+        self.tree_0 = None
+        self.tree_1 = None
+
+    def fit(self, X, y, sample_weight=None):
+        """
+        Fits the predictor
+
+        Args:
+            X (np.array): the feature vectors
+            y (np.array): the target labels
+            sample_weight (None/np.array): the sample weights
+
+        Returns:
+            self: the fitted object
+        """
+        self.tree_0 = DecisionTreeClassifier(*self.args, **self.kwargs)
+        self.tree_0.fit(X, y, sample_weight)
+
+        self.tree_1 = mirror_tree(self.tree_0)
+
+        return self
+
+    def predict_proba(self, X):
+        """
+        Predicts the class membership probabilities
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the class membership probabilities
+        """
+        probs = np.vstack([self.tree_0.predict_proba(X)[:, 0],
+                           self.tree_1.predict_proba(-X)[:, 0]]).T
+        probs = np.mean(probs, axis=1)
+
+        return np.vstack([probs, 1.0 - probs]).T
+
+    def predict(self, X):
+        """
+        Predicts the class labels
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the class labels
+        """
+        probs = self.predict_proba(X)[:, 1]
+        return (probs > 0.5)*1
+
+class MirroredDecisionTreeRegressor(RegressorMixin):
+    """
+    Decision tree regressor with attribute flipping
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor of the regressor
+
+        Args:
+            args: positional arguments passed to the underlying decision trees
+            kwargs: keyword arguments passed to the underlying decision trees
+        """
+        self.args = args
+        self.kwargs = kwargs
+
+        self.tree = None
+
+    def fit(self, X, y, sample_weight=None):
+        """
+        Fits the predictor
+
+        Args:
+            X (np.array): the feature vectors
+            y (np.array): the target labels
+            sample_weight (None/np.array): the sample weights
+
+        Returns:
+            self: the fitted object
+        """
+        self.tree = DecisionTreeRegressor(*self.args, **self.kwargs)
+        self.tree.fit(X, y, sample_weight)
+
+        self.tree = mirror_tree(self.tree)
+
+        return self
+
+    def predict(self, X):
+        """
+        Carries out the regression
+
+        Args:
+            X (np.array): the feature vectors to regress
+
+        Returns:
+            np.array: the regressed values
+        """
+        return self.tree.predict(-X)
+
+class FlippingDecisionTreeRegressor(RegressorMixin):
+    """
+    Decision tree regressor with attribute flipping
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor of the regressor
+
+        Args:
+            args: positional arguments passed to the underlying decision trees
+            kwargs: keyword arguments passed to the underlying decision trees
+        """
+        self.args = args
+        self.kwargs = kwargs
+
+        self.tree_0 = None
+        self.tree_1 = None
+
+    def fit(self, X, y, sample_weight=None):
+        """
+        Fits the predictor
+
+        Args:
+            X (np.array): the feature vectors
+            y (np.array): the target labels
+            sample_weight (None/np.array): the sample weights
+
+        Returns:
+            self: the fitted object
+        """
+        self.tree_0 = DecisionTreeRegressor(*self.args, **self.kwargs)
+        self.tree_0.fit(X, y, sample_weight)
+
+        self.tree_1 = mirror_tree(self.tree_0)
+
+        return self
+
+    def predict(self, X):
+        """
+        Carries out the regression
+
+        Args:
+            X (np.array): the feature vectors to regress
+
+        Returns:
+            np.array: the regressed values
+        """
+        probs = np.vstack([self.tree_0.predict(X),
+                           self.tree_1.predict(-X)]).T
+        probs = np.mean(probs, axis=1)
+
+        return probs
+
+class MirroredRandomForestRegressor(RegressorMixin):
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def fit(self, X, y, sample_weight=None):
+        self.estimator = RandomForestRegressor(**self.kwargs)
+        self.estimator.fit(X, y, sample_weight)
+
+        for idx in range(len(self.estimator.estimators_)):
+            self.estimator.estimators_[idx] = mirror_tree(self.estimator.estimators_[idx])
+
+        return self
+
+    def predict(self, X):
+        return self.estimator.predict(-X)
+
+class MirroredRandomForestClassifier(ClassifierMixin):
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def fit(self, X, y, sample_weight=None):
+        self.estimator = RandomForestClassifier(**self.kwargs)
+        self.estimator.fit(X, y, sample_weight)
+
+        for idx in range(len(self.estimator.estimators_)):
+            self.estimator.estimators_[idx] = mirror_tree(self.estimator.estimators_[idx])
+
+        return self
+
+    def predict_proba(self, X):
+        return self.estimator.predict_proba(-X)
+
+    def predict(self, X):
+        return self.estimator.predict(-X)
+
+class FlippingRandomForestRegressor(RegressorMixin):
+    def __init__(self, **kwargs):
+        if 'n_estimators' in kwargs:
+            n_estimators = kwargs['n_estimators']
+        else:
+            n_estimators = 100
+
+        n_half_estimators = int(np.round(n_estimators/2))
+
+        self.kwargs_tmp = copy.deepcopy(kwargs)
+        self.kwargs_tmp['n_estimators'] = n_half_estimators
+
+        if 'flipping' in self.kwargs_tmp:
+            del self.kwargs_tmp['flipping']
+
+    def fit(self, X, y, sample_weight=None):
+        """
+        Fits the predictor
+
+        Args:
+            X (np.array): the feature vectors
+            y (np.array): the target labels
+            sample_weight (None/np.array): the sample weights
+
+        Returns:
+            self: the fitted object
+        """
+        self.positive = RandomForestRegressor(**self.kwargs_tmp)
+        self.negative = RandomForestRegressor(**self.kwargs_tmp)
+
+        self.positive.fit(X, y, sample_weight)
+        self.negative.fit(-X, y, sample_weight)
+
+        return self
+
+    def predict(self, X):
+        """
+        Carries out the regression
+
+        Args:
+            X (np.array): the feature vectors to regress
+
+        Returns:
+            np.array: the regressed values
+        """
+        probs = np.vstack([self.positive.predict(X),
+                           self.negative.predict(-X)]).T
+        probs = np.mean(probs, axis=1)
+
+        return probs
+
+class FlippingRandomForestClassifier(ClassifierMixin):
+    def __init__(self, **kwargs):
+        if 'n_estimators' in kwargs:
+            n_estimators = kwargs['n_estimators']
+        else:
+            n_estimators = 100
+
+        n_half_estimators = int(np.round(n_estimators/2))
+
+        self.kwargs_tmp = copy.deepcopy(kwargs)
+        self.kwargs_tmp['n_estimators'] = n_half_estimators
+
+        if 'flipping' in self.kwargs_tmp:
+            del self.kwargs_tmp['flipping']
+
+    def fit(self, X, y, sample_weight=None):
+        """
+        Fits the predictor
+
+        Args:
+            X (np.array): the feature vectors
+            y (np.array): the target labels
+            sample_weight (None/np.array): the sample weights
+
+        Returns:
+            self: the fitted object
+        """
+        self.positive = RandomForestClassifier(**self.kwargs_tmp)
+        self.negative = RandomForestClassifier(**self.kwargs_tmp)
+
+        self.positive.fit(X, y, sample_weight)
+        self.negative.fit(-X, y, sample_weight)
+
+        return self
+
+    def predict_proba(self, X):
+        """
+        Predicts the class membership probabilities
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the class membership probabilities
+        """
+        probs = np.vstack([self.positive.predict_proba(X)[:, 0],
+                           self.negative.predict_proba(-X)[:, 0]]).T
+        probs = np.mean(probs, axis=1)
+
+        return np.vstack([probs, 1.0 - probs]).T
+
+    def predict(self, X):
+        """
+        Predicts the class labels
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the class labels
+        """
+        probs = self.predict_proba(X)[:, 1]
+        return (probs > 0.5)*1
 
 class FlippingBaggingBase(RandomStateMixin):
     """
@@ -188,7 +609,7 @@ class FlippingBaggingBase(RandomStateMixin):
 
         raise ValueError("bootstrap_sampling of base class called")
 
-    def flip(self, X):
+    def flip(self, X, idx=None):
         """
         Determine and record the flipping
 
@@ -203,7 +624,10 @@ class FlippingBaggingBase(RandomStateMixin):
         elif self.flipping == 'coordinate':
             self.flippings_.append(self.random_state.choice([-1, 1], X.shape[1], replace=True))
         elif self.flipping == 'full':
-            self.flippings_.append(self.random_state.choice([-1, 1]))
+            if idx / self.n_estimators < 0.5:
+                self.flippings_.append(1.0)
+            else:
+                self.flippings_.append(-1.0)
 
         return self.flippings_[-1]
 
@@ -252,7 +676,7 @@ class FlippingBaggingBase(RandomStateMixin):
 
         return self
 
-class FlippingRandomForestClassifier(FlippingBaggingBase, ClassifierMixin):
+class FlippingRandomForestClassifier2(FlippingBaggingBase, ClassifierMixin):
     """
     Flipping classification forest
     """
@@ -350,10 +774,10 @@ class FlippingRandomForestClassifier(FlippingBaggingBase, ClassifierMixin):
         self.estimators_ = []
         self.flippings_ = []
 
-        for _ in range(self.n_estimators):
+        for idx in range(self.n_estimators):
             X_bs, y_bs, sw_bs = self.bootstrap_sampling(X, y, sample_weight)
 
-            flipping = self.flip(X)
+            flipping = self.flip(X, idx)
 
             estimator = DecisionTreeClassifier(min_samples_leaf=self.min_samples_leaf,
                                                 max_features=max_features,
@@ -398,7 +822,7 @@ class FlippingRandomForestClassifier(FlippingBaggingBase, ClassifierMixin):
         probs = self.predict_proba(X)[:, 1]
         return (probs > 0.5).astype(int)
 
-class FlippingRandomForestRegressor(FlippingBaggingBase, RegressorMixin):
+class FlippingRandomForestRegressor2(FlippingBaggingBase, RegressorMixin):
     """
     The flipping forest regressor
     """
@@ -482,10 +906,10 @@ class FlippingRandomForestRegressor(FlippingBaggingBase, RegressorMixin):
         self.estimators_ = []
         self.flippings_ = []
 
-        for _ in range(self.n_estimators):
+        for idx in range(self.n_estimators):
             X_bs, y_bs, sw_bs = self.bootstrap_sampling(X, y, sample_weight)
 
-            flipping = self.flip(X)
+            flipping = self.flip(X, idx)
 
             estimator = DecisionTreeRegressor(min_samples_leaf=self.min_samples_leaf,
                                                 max_features=max_features,
