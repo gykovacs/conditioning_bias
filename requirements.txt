@@ -6,3 +6,4 @@ pandas
 plotly
 kaleido
 jinja2
+common-datasets

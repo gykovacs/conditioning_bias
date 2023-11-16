@@ -58,8 +58,10 @@ class FlippingDecisionTreeRegressor(RegressorMixin):
         Returns:
             np.array: the regressed values
         """
-        probs = np.vstack([self.tree_0.predict(X),
-                           self.tree_1.predict(-X)]).T
+        probs = np.vstack([
+            self.tree_0.predict(X),
+            self.tree_1.predict(-X)
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return probs

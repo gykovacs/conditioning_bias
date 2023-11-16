@@ -30,10 +30,12 @@ __all__ = ['MirroredDecisionTreeClassifier',
             'dummy_data']
 
 def dummy_data():
-    data = pd.DataFrame({'criminal_record': [0,  0,  1,  1],
-                         'income':          [40, 60, 40, 80],
-                         'years_in_job':    [4,  6,  6,  2],
-                         'defaulted':       [1,  0,  0,  0]})
+    data = pd.DataFrame({
+        'criminal_record': [0,  0,  1,  1],
+        'income':          [40, 60, 40, 80],
+        'years_in_job':    [4,  6,  6,  2],
+        'defaulted':       [1,  0,  0,  0]
+    })
 
     dataset = {}
 
@@ -232,8 +234,10 @@ class FlippingDecisionTreeClassifier(ClassifierMixin):
         Returns:
             np.array: the class membership probabilities
         """
-        probs = np.vstack([self.tree_0.predict_proba(X)[:, 0],
-                           self.tree_1.predict_proba(-X)[:, 0]]).T
+        probs = np.vstack([
+            self.tree_0.predict_proba(X)[:, 0],
+            self.tree_1.predict_proba(-X)[:, 0]
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return np.vstack([probs, 1.0 - probs]).T
@@ -346,8 +350,10 @@ class FlippingDecisionTreeRegressor(RegressorMixin):
         Returns:
             np.array: the regressed values
         """
-        probs = np.vstack([self.tree_0.predict(X),
-                           self.tree_1.predict(-X)]).T
+        probs = np.vstack([
+            self.tree_0.predict(X),
+            self.tree_1.predict(-X)
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return probs
@@ -432,8 +438,10 @@ class FlippingRandomForestRegressor(RegressorMixin):
         Returns:
             np.array: the regressed values
         """
-        probs = np.vstack([self.positive.predict(X),
-                           self.negative.predict(-X)]).T
+        probs = np.vstack([
+            self.positive.predict(X),
+            self.negative.predict(-X)
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return probs
@@ -483,8 +491,10 @@ class FlippingRandomForestClassifier(ClassifierMixin):
         Returns:
             np.array: the class membership probabilities
         """
-        probs = np.vstack([self.positive.predict_proba(X)[:, 0],
-                           self.negative.predict_proba(-X)[:, 0]]).T
+        probs = np.vstack([
+            self.positive.predict_proba(X)[:, 0],
+            self.negative.predict_proba(-X)[:, 0]
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return np.vstack([probs, 1.0 - probs]).T

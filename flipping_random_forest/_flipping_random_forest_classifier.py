@@ -16,7 +16,7 @@ __all__ = ['FlippingRandomForestClassifier']
 class FlippingRandomForestClassifier(ClassifierMixin):
     """
         The constructor of the flipping forest classifier
-        
+
         Args:
             kwargs (dict): the arguments of the classifier
         """
@@ -64,8 +64,10 @@ class FlippingRandomForestClassifier(ClassifierMixin):
         Returns:
             np.array: the class membership probabilities
         """
-        probs = np.vstack([self.positive.predict_proba(X)[:, 0],
-                           self.negative.predict_proba(-X)[:, 0]]).T
+        probs = np.vstack([
+            self.positive.predict_proba(X)[:, 0],
+            self.negative.predict_proba(-X)[:, 0]
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return np.vstack([probs, 1.0 - probs]).T
