@@ -58,8 +58,10 @@ class FlippingDecisionTreeClassifier(ClassifierMixin):
         Returns:
             np.array: the class membership probabilities
         """
-        probs = np.vstack([self.tree_0.predict_proba(X)[:, 0],
-                           self.tree_1.predict_proba(-X)[:, 0]]).T
+        probs = np.vstack([
+            self.tree_0.predict_proba(X)[:, 0],
+            self.tree_1.predict_proba(-X)[:, 0]
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return np.vstack([probs, 1.0 - probs]).T

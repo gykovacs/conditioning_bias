@@ -20,7 +20,7 @@ class FlippingRandomForestRegressor(RegressorMixin):
     def __init__(self, **kwargs):
         """
         The constructor of the flipping forest regressor
-        
+
         Args:
             kwargs (dict): the arguments of the regressor
         """
@@ -67,8 +67,10 @@ class FlippingRandomForestRegressor(RegressorMixin):
         Returns:
             np.array: the regressed values
         """
-        probs = np.vstack([self.positive.predict(X),
-                           self.negative.predict(-X)]).T
+        probs = np.vstack([
+            self.positive.predict(X),
+            self.negative.predict(-X)
+        ]).T
         probs = np.mean(probs, axis=1)
 
         return probs
