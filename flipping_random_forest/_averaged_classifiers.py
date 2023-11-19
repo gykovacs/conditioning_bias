@@ -18,8 +18,8 @@ class AveragedDecisionTreeClassifier:
         return self
 
     def predict_proba(self, X):
-        values_le = self.tree.tree_.value[apply(X, self.tree, '<')]
-        values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')]
+        values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, :]
+        values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, :]
 
         values_le = (values_le.T / np.sum(values_le, axis=1)).T
         values_leq = (values_leq.T / np.sum(values_leq, axis=1)).T
@@ -35,7 +35,7 @@ def _evaluate_trees(X, trees, operator):
     values = []
     for tree in trees:
         nodes = apply(X=X, tree=tree, operator=operator)
-        values.append(tree.tree_.value[nodes])
+        values.append(tree.tree_.value[nodes][:, 0, :])
 
     values = [(value.T / np.sum(value, axis=1)).T for value in values]
 
