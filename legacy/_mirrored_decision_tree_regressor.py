@@ -56,4 +56,3 @@ class MirroredDecisionTreeRegressor(RegressorMixin):
             np.array: the regressed values
         """
         return self.tree.predict(-X)
-    
