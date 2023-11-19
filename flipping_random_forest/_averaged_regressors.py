@@ -2,10 +2,6 @@
 This module implements the averaged regressors
 """
 
-"""
-This module implements the averaged classifiers
-"""
-
 import numpy as np
 
 from sklearn.tree import DecisionTreeRegressor
@@ -13,7 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 from ._tree_inference import apply
 
-class AveragedDecisionTreeClassifier:
+class AveragedDecisionTreeRegressor:
     def __init__(self, **kwargs):
         self.tree = DecisionTreeRegressor(**kwargs)
 
@@ -22,8 +18,8 @@ class AveragedDecisionTreeClassifier:
         return self
 
     def predict(self, X):
-        values_le = self.tree.tree_.value[apply(X, self.tree, '<')]
-        values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')]
+        values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, 0]
+        values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, 0]
 
         probs = np.mean(np.array([values_le, values_leq]), axis=0)
 
@@ -33,11 +29,11 @@ def _evaluate_trees(X, trees, operator):
     values = []
     for tree in trees:
         nodes = apply(X=X, tree=tree, operator=operator)
-        values.append(tree.tree_.value[nodes])
+        values.append(tree.tree_.value[nodes][:, 0, 0])
 
     return np.mean(values, axis=0)
 
-class AveragedRandomForestClassifier:
+class AveragedRandomForestRegressor:
     def __init__(self, mode='all', **kwargs):
         self.mode = mode
         self.forest = RandomForestRegressor(**kwargs)
