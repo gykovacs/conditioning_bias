@@ -5,3 +5,8 @@ n_bounds_regr = (1, 2000)
 n_from_phenotypes = 1
 n_splits = 5
 n_repeats = 100
+
+dataset_map = {
+    'lymphography-normal-fibrosis': 'lymphography',
+    'stock_portfolio_performance': 'stock-portfolio'
+}
