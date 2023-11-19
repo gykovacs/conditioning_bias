@@ -4,69 +4,64 @@ This module implements the tree inference methods
 
 import numpy as np
 
-__all__ = ['tree_inference']
+__all__ = ['tree_inference', 'apply']
 
-def tree_inference(
-    X,
-    feature,
-    threshold,
-    value,
-    children_left,
-    children_right):
+def apply(X: np.array, tree, operator: str = '<=') -> np.array:
+        """
+        Implement the inference in a tree
+
+        Args:
+            X (np.array(float)): the array of feature vectors to infer
+            tree (np.array(float)): the fitted tree
+            operator (str): the splitting operator to be used
+
+        Returns:
+            np.array(int): the leaf node indices belonging to the vectors
+        """
+
+        # allocating the buffer to keep track of the inference in the tree
+        node_ids = np.repeat(0, X.shape[0])
+        leaf_node_flag = tree.tree_.children_left == tree.tree_.children_right
+
+        while not np.all(leaf_node_flag[node_ids]):
+            # the indices of vectors not at leaf nodes yet
+            active_indices = np.where(~leaf_node_flag[node_ids])[0]
+
+            # the actual nodes where these vectors are
+            active_nodes = node_ids[active_indices]
+
+            # do the branching
+            feature = tree.tree_.feature[active_nodes]
+            threshold = tree.tree_.threshold[active_nodes]
+
+            if operator == '<=':
+                left = X[active_indices, feature] <= threshold
+            else:
+                left = X[active_indices, feature] < threshold
+
+            # update the nodes where the vectors are
+            active_nodes[left] = tree.tree_.children_left[active_nodes[left]]
+            active_nodes[~left] = tree.tree_.children_right[active_nodes[~left]]
+
+            node_ids[active_indices] = active_nodes
+
+        return node_ids
+
+def tree_inference(*,
+    X: np.array,
+    tree,
+    operator: str = '<=') -> np.array:
     """
     Implement the inference in a tree
 
     Args:
         X (np.array(float)): the array of feature vectors to infer
-        threshold (np.array(float)): the array of thresholds
-        value (np.array(int/float)): the value vectors
-        children_left (np.array(int)): the left children
-        children_right (np.array(int)): the right children
+        tree (obj): the fitted tree
+        operator (str): the splitting operator '<' or '<='
 
     Returns:
-        np.array(int/float): the inferred values
+        np.array(int|float), np.array(int): the inferred values and leaf node ids
     """
     # allocating some buffers to keep track of the inference in the tree
-    n_to_infer = X.shape[0]
-    indices_to_infer = np.arange(n_to_infer)
-    node_ids = np.repeat(0, n_to_infer)
 
-    # allocating a buffer for the results of the inference
-    predictions = np.zeros(shape=(X.shape[0], value.shape[1]))
-
-    # allocating two indicator buffers for leaf nodes and vectors that already got to
-    # leaf nodes
-    leaf_nodes = np.repeat(False, children_left.shape[0])
-    finished_vectors = np.repeat(False, X.shape[0])
-
-    # initializing the leaf node indicator
-    for idx, (left, right) in enumerate(zip(children_left, children_right)):
-        if left == -1 and right == -1:
-            leaf_nodes[idx] = True
-
-    while n_to_infer > 0:
-        # there are vectors which did not get to a leaf node
-
-        jdx = 0
-        for vector_idx in indices_to_infer[:n_to_infer]:
-            # iterate through the indices of vectors to be inferred
-
-            if leaf_nodes[node_ids[vector_idx]]:
-                # if we got to a leaf node with the vector, its value is updated and the
-                # finished flag is set
-                predictions[vector_idx] = value[node_ids[vector_idx]]
-                finished_vectors[vector_idx] = True
-            else:
-                # otherwise we check if the vector goes to the left hand side or right hand
-                # side and update its actual position in the tree accoringly
-                if X[vector_idx, feature[node_ids[vector_idx]]] <= threshold[node_ids[vector_idx]]:
-                    node_ids[vector_idx] = children_left[node_ids[vector_idx]]
-                else:
-                    node_ids[vector_idx] = children_right[node_ids[vector_idx]]
-                # the vector is recorded as one to continue the inference for
-                indices_to_infer[jdx] = vector_idx
-                jdx += 1
-
-        n_to_infer = jdx
-
-    return predictions, node_ids
+    return tree.tree_.value[apply(X, tree, operator), 0, :]
