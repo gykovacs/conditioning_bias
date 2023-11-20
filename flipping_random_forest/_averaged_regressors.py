@@ -10,20 +10,33 @@ from sklearn.ensemble import RandomForestRegressor
 from ._tree_inference import apply
 
 class AveragedDecisionTreeRegressor:
-    def __init__(self, **kwargs):
+    def __init__(self, mode='full', n_trials=10, **kwargs):
         self.tree = DecisionTreeRegressor(**kwargs)
+        self.mode = mode
+        self.n_trials = n_trials
+
+        self.random_state = kwargs.get('random_state')
+        if not isinstance(self.random_state, np.random.RandomState):
+            self.random_state = np.random.RandomState(self.random_state)
 
     def fit(self, X, y, sample_weight=None):
         self.tree.fit(X, y, sample_weight=sample_weight)
         return self
 
     def predict(self, X):
-        values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, 0]
-        values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, 0]
+        if self.mode == 'full':
+            values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, 0]
+            values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, 0]
 
-        probs = np.mean(np.array([values_le, values_leq]), axis=0)
+            values = np.mean(np.array([values_le, values_leq]), axis=0)
 
-        return probs
+            return values
+        else:
+            values = [self.tree.tree_.value[apply(X, self.tree, None, self.random_state)][:, 0, 0]
+                        for _ in range(self.n_trials)]
+            values = np.mean(values, axis=0)
+
+            return values
 
 def _evaluate_trees(X, trees, operator):
     values = []

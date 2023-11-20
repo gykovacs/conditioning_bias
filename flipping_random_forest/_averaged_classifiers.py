@@ -10,23 +10,36 @@ from sklearn.ensemble import RandomForestClassifier
 from ._tree_inference import apply
 
 class AveragedDecisionTreeClassifier:
-    def __init__(self, **kwargs):
+    def __init__(self, mode = 'full', n_trials = 10, **kwargs):
         self.tree = DecisionTreeClassifier(**kwargs)
+        self.mode = mode
+        self.n_trials = n_trials
+        self.random_state = kwargs.get('random_state', None)
+
+        if not isinstance(self.random_state, np.random.RandomState):
+            self.random_state = np.random.RandomState(self.random_state)
 
     def fit(self, X, y, sample_weight=None):
         self.tree.fit(X, y, sample_weight=sample_weight)
         return self
 
     def predict_proba(self, X):
-        values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, :]
-        values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, :]
+        if self.mode == 'full':
+            values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, :]
+            values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, :]
 
-        values_le = (values_le.T / np.sum(values_le, axis=1)).T
-        values_leq = (values_leq.T / np.sum(values_leq, axis=1)).T
+            values_le = (values_le.T / np.sum(values_le, axis=1)).T
+            values_leq = (values_leq.T / np.sum(values_leq, axis=1)).T
 
-        probs = np.mean(np.array([values_le, values_leq]), axis=0)
+            probs = np.mean(np.array([values_le, values_leq]), axis=0)
 
-        return probs
+            return probs
+        else:
+            values = [self.tree.tree_.value[apply(X, self.tree, None, self.random_state)][:, 0, :]
+                        for _ in range(self.n_trials)]
+            values = [(value.T / np.sum(value, axis=1)).T for value in values]
+
+            return np.mean(np.array(values), axis=0)
 
     def predict(self, X):
         return np.argmax(self.predict_proba(X), axis=1)
