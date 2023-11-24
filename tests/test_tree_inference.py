@@ -45,7 +45,7 @@ def test_tree_inference():
         operator='<'
     )
 
-    assert result[0][0][0] == 3.0
+    assert result[0][0] == 3.0
 
     result = tree_inference(
         X=np.array([[1]]),
@@ -53,4 +53,22 @@ def test_tree_inference():
         operator='<='
     )
 
-    assert result[0][0][0] == 6.0
+    assert result[0][0] == 6.0
+
+    result = tree_inference(
+        X=np.array([[1]]),
+        tree=tree,
+        operator=None,
+        random_state=4
+    )
+
+    assert result[0][0] == 6.0
+
+    result = tree_inference(
+        X=np.array([[1]]),
+        tree=tree,
+        operator=None,
+        random_state=5
+    )
+
+    assert result[0][0] == 3.0
