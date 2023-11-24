@@ -9,3 +9,5 @@ from ._averaged_classifiers import *
 from ._averaged_regressors import *
 from ._flipping_classifiers import *
 from ._flipping_regressors import *
+from ._specific_classifiers import *
+from ._specific_regressors import *

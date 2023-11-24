@@ -34,6 +34,12 @@ def evaluate_classification(*,
 
         X = dataset['data']
         y = dataset['target']
+
+        mask = np.arange(X.shape[0])
+        random_state.shuffle(mask)
+        X = X[mask]
+        y = y[mask]
+
         validator = RepeatedStratifiedKFold(**validator_params)
 
         for fdx, (train, test) in enumerate(validator.split(X, y, y)):
@@ -42,7 +48,12 @@ def evaluate_classification(*,
             X_test = X[test]
             y_test = y[test]
 
-            for idx, param in enumerate(params):
+            if isinstance(params, list):
+                params_tmp = params
+            elif isinstance(params, dict):
+                params_tmp = [params[dataset['name']]]
+
+            for idx, param in enumerate(params_tmp):
                 classifier = estimator(**param)
                 classifier.fit(X_train, y_train)
                 y_pred = classifier.predict_proba(X_test)[:, 1]
@@ -84,7 +95,12 @@ def evaluate_regression(*,
             X_test = X[test]
             y_test = y[test]
 
-            for idx, param in enumerate(params):
+            if isinstance(params, list):
+                params_tmp = params
+            elif isinstance(params, dict):
+                params_tmp = [params[dataset['name']]]
+
+            for idx, param in enumerate(params_tmp):
                 classifier = estimator(**param)
                 classifier.fit(X_train, y_train)
                 y_pred = classifier.predict(X_test)
