@@ -65,7 +65,7 @@ class FlippingRandomForestRegressor:
     def fit(self, X, y, sample_weight=None):
         if self.mode == 'full':
             self.forest_l = RandomForestRegressor(**self.params)
-            self.forest_leq = RandomForestRegressor(**self.params)
+            self.forest_leq = RandomForestRegressor(**(self.params | {'random_state': self.params.get('random_state', 5) + 1}))
 
             self.forest_l.fit(X, y, sample_weight=sample_weight)
             self.forest_leq.fit(-X, y, sample_weight=sample_weight)
