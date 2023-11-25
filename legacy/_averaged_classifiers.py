@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-from ._tree_inference import apply
+from ..flipping_random_forest._tree_inference import apply
 
 class AveragedDecisionTreeClassifier:
     def __init__(self, mode = 'full', n_trials = 10, **kwargs):
