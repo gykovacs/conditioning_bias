@@ -47,3 +47,23 @@ def lattice_features(X: np.array, threshold=1) -> bool:
     """
 
     return np.array([lattice_feature(X[:, idx], threshold) for idx in range(X.shape[1])])
+
+def count_lattice_splits(X: np.array, tree):
+    lattice = lattice_features(X)
+    threshold = tree.tree_.threshold
+    feature = tree.tree_.feature
+
+    n_splits = np.sum(tree.tree_.children_left != tree.tree_.children_right)
+
+    n_lattice_splits = 0
+    for idx, lflag in enumerate(lattice):
+        if not lflag:
+            continue
+
+        thresholds = threshold[feature == idx]
+
+        for th in thresholds:
+            diffs = np.round(np.abs(np.unique(X[:, idx]) - th), 8)
+            n_lattice_splits += np.any(np.unique(diffs, return_counts=True)[1] > 1) and 0.0 in diffs
+
+    return n_lattice_splits, n_splits

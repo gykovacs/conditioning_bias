@@ -37,7 +37,15 @@ def apply(X: np.array, tree, operator: str = '<=', random_state=None) -> np.arra
             feature = tree.tree_.feature[active_nodes]
             threshold = tree.tree_.threshold[active_nodes]
 
-            if operator is not None:
+            if isinstance(operator, list):
+                left = []
+                for adx, fdx, th in zip(active_indices, feature, threshold):
+                    if operator[fdx] == '<':
+                        left.append(X[adx, fdx] < th)
+                    else:
+                        left.append(X[adx, fdx] <= th)
+                left = np.array(left)
+            elif operator is not None:
                 if operator == '<=':
                     left = X[active_indices, feature] <= threshold
                 else:
