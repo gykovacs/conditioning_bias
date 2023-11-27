@@ -17,19 +17,43 @@ __all__ = [
     'determine_specific_operator_classification'
 ]
 
-def determine_specific_operator_classification(X, y, tree):
+def determine_specific_operator_classification(X, y, tree, mode='normal'):
     aucs = np.array([roc_auc_score(y, X[:, idx]) for idx in range(X.shape[1])])
+
+    if mode != 'normal':
+        operators = []
+        for auc in aucs:
+            if auc < 0.5:
+                operators.append('<=')
+            else:
+                operators.append('<')
+        return operators
+
 
     lattice_feature_mask = lattice_features(X)
 
     if np.sum(lattice_feature_mask) == 0:
         return '<='
 
-    imp = tree.feature_importances_[lattice_feature_mask]
+    nonzero_imp_mask = tree.feature_importances_ > 0
 
-    weighted_aucs = imp * aucs[lattice_feature_mask] / np.sum(imp)
+    imp = tree.feature_importances_[lattice_feature_mask & nonzero_imp_mask]
 
-    return '<' if np.sum(weighted_aucs) >= 0.5 else '<='
+    if np.sum(imp) < 1e-8:
+        return '<='
+
+    imp = imp / np.sum(imp)
+
+    weighted_aucs = imp * aucs[lattice_feature_mask & nonzero_imp_mask]
+
+    if mode == 'normal':
+        return '<' if np.sum(weighted_aucs) >= 0.5 else '<='
+        #weighted_aucs = imp * aucs[lattice_feature_mask & nonzero_imp_mask]
+    else:
+        return '<=' if np.sum(weighted_aucs) >= 0.5 else '<'
+        #weighted_aucs = (1.0 - imp) * aucs[lattice_feature_mask & nonzero_imp_mask]
+
+    #return '<' if np.sum(weighted_aucs) >= 0.5 else '<='
 
 class OperatorDecisionTreeClassifier:
     """
@@ -100,8 +124,11 @@ class OperatorDecisionTreeClassifier:
 
         return np.mean(np.array(values), axis=0)
 
-    def predict_proba_specific(self, X):
-        operator = determine_specific_operator_classification(self.X_fit_, self.y_fit_, self.tree)
+    def predict_proba_specific(self, X, mode):
+        if mode == 'specific':
+            operator = determine_specific_operator_classification(self.X_fit_, self.y_fit_, self.tree, 'normal')
+        elif mode == 'rspecific':
+            operator = determine_specific_operator_classification(self.X_fit_, self.y_fit_, self.tree, 'reversed')
 
         counts = tree_inference(
             X=X,
@@ -126,8 +153,8 @@ class OperatorDecisionTreeClassifier:
             return self.predict_proba_operator(X)
         elif self.mode in ['avg_full', 'avg_rand']:
             return self.predict_proba_average(X)
-        elif self.mode == 'specific':
-            return self.predict_proba_specific(X)
+        elif self.mode in ['specific', 'rspecific']:
+            return self.predict_proba_specific(X, self.mode)
 
     def get_modes(self):
         return ['<', '<=', 'avg_full', 'avg_rand', 'specific']

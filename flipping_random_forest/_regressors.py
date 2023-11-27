@@ -30,6 +30,10 @@ def determine_specific_operator_regression(X, y, tree):
         return '<='
 
     imp = tree.feature_importances_[lattice_feature_mask]
+
+    if np.sum(imp) < 1e-8:
+        return '<='
+
     weighted_aucs = imp * aucs[lattice_feature_mask] / np.sum(imp)
 
     if minority_1:

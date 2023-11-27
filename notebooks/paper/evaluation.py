@@ -20,6 +20,7 @@ def evaluate_classification(*,
     datasets: pd.DataFrame,
     estimator,
     modes,
+    params,
     validator_params,
     random_state):
 
@@ -48,7 +49,9 @@ def evaluate_classification(*,
             X_test = X[test]
             y_test = y[test]
 
-            classifier = estimator(random_state=5)
+            par = params[dataset['name']] | {'random_state': 5}
+
+            classifier = estimator(**par)
             classifier.fit(X_train, y_train)
 
             for idx, mode in enumerate(modes):
@@ -59,6 +62,7 @@ def evaluate_classification(*,
                                 'fold': fdx,
                                 'auc': roc_auc_score(y_test, y_pred),
                                 'mode': mode,
+                                'params': par,
                                 'estimator': estimator.__name__})
 
     return pd.DataFrame(results)
@@ -67,6 +71,7 @@ def evaluate_regression(*,
     datasets: pd.DataFrame,
     estimator,
     modes,
+    params,
     validator_params,
     random_state):
 
@@ -89,7 +94,9 @@ def evaluate_regression(*,
             X_test = X[test]
             y_test = y[test]
 
-            regressor = estimator(random_state=5)
+            par = params[dataset['name']] | {'random_state': 5}
+
+            regressor = estimator(**par)
             regressor.fit(X_train, y_train)
 
             for idx, mode in enumerate(modes):
@@ -100,6 +107,7 @@ def evaluate_regression(*,
                                 'fold': fdx,
                                 'r2': r2_score(y_test, y_pred),
                                 'mode': mode,
+                                'params': par,
                                 'estimator': estimator.__name__})
 
     return pd.DataFrame(results)
