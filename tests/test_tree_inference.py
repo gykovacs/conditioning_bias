@@ -4,7 +4,7 @@ Testing the tree inference methods
 
 import numpy as np
 
-from flipping_random_forest import tree_inference
+from conditioning_bias import tree_inference
 
 def test_tree_inference():
     """

@@ -9,10 +9,9 @@ import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 
-from flipping_random_forest import (
+from conditioning_bias import (
     OperatorDecisionTreeRegressor,
-    OperatorRandomForestRegressor,
-    determine_specific_operator_regression
+    OperatorRandomForestRegressor
 )
 
 @pytest.mark.parametrize('random_state', [2, 3, 4, 5])
@@ -90,16 +89,3 @@ def test_modes_rf(random_state):
     for mode in odt.get_modes():
         odt.set_mode(mode)
         assert odt.predict(X_test).shape == (20,)
-
-@pytest.mark.parametrize('random_state', [2, 3, 4, 5])
-def test_specific(random_state):
-    """
-    Testing if the specific operator is determined correctly
-    """
-
-    random_state = np.random.RandomState(random_state)
-
-    X = random_state.random_sample(size=(100, 3))
-    y = random_state.random_sample(size=100)
-
-    assert determine_specific_operator_regression(X, y, None) == '<='

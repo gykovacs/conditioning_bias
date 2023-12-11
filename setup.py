@@ -7,7 +7,7 @@ def readme():
     with codecs.open('README.rst', encoding='utf-8-sig') as f:
         return f.read()
 
-version_file= os.path.join('flipping_random_forest', '_version.py')
+version_file= os.path.join('conditioning_bias', '_version.py')
 __version__= "0.0.0"
 with open(version_file) as f:
     exec(f.read())
@@ -33,15 +33,15 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-DISTNAME= 'flipping_random_forest'
+DISTNAME= 'conditioning_bias'
 DESCRIPTION= 'Local MCD KDE'
 LONG_DESCRIPTION= readme()
 LONG_DESCRIPTION_CONTENT_TYPE='text/x-rst'
 MAINTAINER= 'Gyorgy Kovacs'
 MAINTAINER_EMAIL= 'gyuriofkovacs@gmail.com'
-URL= 'https://github.com/gykovacs/flipping_random_forest'
+URL= 'https://github.com/gykovacs/conditioning_bias'
 LICENSE= 'MIT'
-DOWNLOAD_URL= 'https://github.com/gykovacs/flipping_random_forest'
+DOWNLOAD_URL= 'https://github.com/gykovacs/conditioning_bias'
 VERSION= __version__
 CLASSIFIERS= [  'Intended Audience :: Science/Research',
                 'Intended Audience :: Developers',
@@ -63,7 +63,7 @@ EXTRAS_REQUIRE= {'tests': ['pytest'],
                  'docs': ['sphinx', 'sphinx-gallery', 'sphinx_rtd_theme', 'matplotlib', 'pandas']}
 PYTHON_REQUIRES= '>=3.5'
 CMDCLASS = {'test': PyTest}
-PACKAGE_DIR= {'flipping_random_forest': 'flipping_random_forest'}
+PACKAGE_DIR= {'conditioning_bias': 'conditioning_bias'}
 SETUP_REQUIRES=['setuptools>=41.0.1', 'wheel>=0.33.4', 'pytest-runner']
 TESTS_REQUIRE=['pytest']
 

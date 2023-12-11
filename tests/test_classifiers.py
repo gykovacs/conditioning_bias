@@ -9,10 +9,9 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-from flipping_random_forest import (
+from conditioning_bias import (
     OperatorDecisionTreeClassifier,
-    OperatorRandomForestClassifier,
-    determine_specific_operator_classification
+    OperatorRandomForestClassifier
 )
 
 @pytest.mark.parametrize('random_state', [2, 3, 4, 5])
@@ -100,16 +99,3 @@ def test_modes_rf(random_state):
     for mode in odt.get_modes():
         odt.set_mode(mode)
         assert odt.predict_proba(X_test).shape == (20, 2)
-
-@pytest.mark.parametrize('random_state', [2, 3, 4, 5])
-def test_specific(random_state):
-    """
-    Testing if the specific operator is determined correctly
-    """
-
-    random_state = np.random.RandomState(random_state)
-
-    X = random_state.random_sample(size=(100, 3))
-    y = random_state.randint(0, 2, size=100)
-
-    assert determine_specific_operator_classification(X, y, None) == '<='

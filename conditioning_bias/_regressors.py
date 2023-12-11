@@ -13,33 +13,8 @@ from ._lattice_feature import lattice_features
 
 __all__ = [
     'OperatorDecisionTreeRegressor',
-    'OperatorRandomForestRegressor',
-    'determine_specific_operator_regression'
+    'OperatorRandomForestRegressor'
 ]
-
-def determine_specific_operator_regression(X, y, tree):
-    y_tmp = (y < np.mean(y)).astype(int)
-
-    aucs = np.array([roc_auc_score(y_tmp, X[:, idx]) for idx in range(X.shape[1])])
-
-    minority_1 = np.sum(y_tmp == 1) < np.sum(y_tmp == 0)
-
-    lattice_feature_mask = lattice_features(X)
-
-    if np.sum(lattice_feature_mask) == 0:
-        return '<='
-
-    imp = tree.feature_importances_[lattice_feature_mask]
-
-    if np.sum(imp) < 1e-8:
-        return '<='
-
-    weighted_aucs = imp * aucs[lattice_feature_mask] / np.sum(imp)
-
-    if minority_1:
-        return '<' if np.sum(weighted_aucs) >= 0.5 else '<='
-    else:
-        return '<=' if np.sum(weighted_aucs) >= 0.5 else '<'
 
 class OperatorDecisionTreeRegressor:
     """
@@ -50,7 +25,7 @@ class OperatorDecisionTreeRegressor:
         The constructor of the regressor
 
         Args:
-            mode (str): the operator to use ('<' or '<=')
+            mode (str): the operator to use ('<'/'<='/'avg_full'/'avg_rand')
             kwargs (dict): the keyword arguments of the base learner decision tree
         """
         self.mode = mode
@@ -59,18 +34,30 @@ class OperatorDecisionTreeRegressor:
         if not isinstance(self.random_state, np.random.RandomState):
             self.random_state = np.random.RandomState(self.random_state)
 
-    def set_mode(self, mode):
-        self.mode = mode
-
-    def fit(self, X, y, sample_weight=None):
+    def set_mode(self, mode: str):
         """
-        Fitting the regressor
+        Set the mode of operation
+
+        Args:
+            mode (str): the mode of operation ('<'/'<='/'avg_full'/'avg_rand')
+
+        Returns:
+            obj: the adjusted object
+        """
+        self.mode = mode
+        return self
+
+    def fit(self, X: np.array, y: np.array, sample_weight: np.array = None):
+        """
+        Fitting the classifier
 
         Args:
             X (np.array): the feature vectors to predict
+            y (np.array): the target label
+            sample_weight (np.array|None): the sample weights to be used
 
         Returns:
-            np.array: the probabilities
+            OperatorDecisionTreeRegressor: the fitted object
         """
 
         self.tree.fit(X, y, sample_weight)
@@ -81,14 +68,32 @@ class OperatorDecisionTreeRegressor:
 
         return self
 
-    def predict_operator(self, X):
+    def predict_operator(self, X: np.array):
+        """
+        Predicts with a specific operator
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the predictions
+        """
         return tree_inference(
                 X=X,
                 tree=self.tree,
                 operator=self.mode
             )[:, 0]
 
-    def predict_average(self, X):
+    def predict_average(self, X: np.array):
+        """
+        Predicts by averaging
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the predictions
+        """
         if self.mode == 'avg_full':
             values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, 0]
             values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, 0]
@@ -103,17 +108,7 @@ class OperatorDecisionTreeRegressor:
 
             return values
 
-    def predict_specific(self, X):
-        operator = determine_specific_operator_regression(self.X_fit_, self.y_fit_, self.tree)
-
-        return tree_inference(
-                X=X,
-                tree=self.tree,
-                operator=operator
-            )[:, 0]
-
-
-    def predict(self, X):
+    def predict(self, X: np.array):
         """
         Predicting the values
 
@@ -126,15 +121,24 @@ class OperatorDecisionTreeRegressor:
 
         if self.mode in ['<', '<=']:
             return self.predict_operator(X)
-        elif self.mode in ['avg_full', 'avg_half']:
+        elif self.mode in ['avg_full', 'avg_rand']:
             return self.predict_average(X)
-        elif self.mode == 'specific':
-            return self.predict_specific(X)
 
     def get_modes(self):
-        return ['<', '<=', 'avg_full', 'avg_half', 'specific']
+        return ['<', '<=', 'avg_full', 'avg_rand']
 
-def _evaluate_trees(X, trees, operator):
+def _evaluate_trees(X: np.array, trees: list, operator: str):
+    """
+    Evaluates a list if trees
+
+    Args:
+        X (np.array): the feature vectors to predict
+        trees (list(str)): the list of trees to use for prediction
+        operator (str): the operator to be used during the prediction
+
+    Returns:
+        np.array: the predictions
+    """
     values = []
     for tree in trees:
         nodes = apply(X=X, tree=tree, operator=operator)
@@ -151,14 +155,24 @@ class OperatorRandomForestRegressor:
         The constructor of the regressor
 
         Args:
-            mode (str): the operator to use ('<' or '<=')
+            mode (str): the operator to use ('<'/'<='/'avg_full'/'avg_half')
             kwargs (dict): the keyword arguments of the base learner decision tree
         """
         self.mode = mode
         self.forest = RandomForestRegressor(**kwargs)
 
     def set_mode(self, mode):
+        """
+        Set the mode of operation
+
+        Args:
+            mode (str): '<'/'<='/'avg_full'/'avg_half'
+
+        Returns:
+            OperatorRandomForestRegressor: the modified object
+        """
         self.mode = mode
+        return self
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -166,9 +180,11 @@ class OperatorRandomForestRegressor:
 
         Args:
             X (np.array): the feature vectors to predict
+            y (np.array): the target label
+            sample_weight (np.array|None): the sample weights to be used
 
         Returns:
-            np.array: the probabilities
+            OperatorRandomForestRegressor: the fitted object
         """
 
         self.forest.fit(X, y, sample_weight)
@@ -180,10 +196,28 @@ class OperatorRandomForestRegressor:
         return self
 
     def predict_operator(self, X):
+        """
+        Predicts with a specific operator
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the predictions
+        """
         return np.mean([tree_inference(X=X, tree=tree, operator=self.mode)
                         for tree in self.forest.estimators_], axis=0)[:, 0]
 
     def predict_average(self, X):
+        """
+        Predicts by averaging
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the predictions
+        """
         if self.mode == 'avg_all':
             return np.mean([
                 _evaluate_trees(X, self.forest.estimators_, '<'),
@@ -197,11 +231,6 @@ class OperatorRandomForestRegressor:
                 _evaluate_trees(X, self.forest.estimators_[:n_half], '<'),
                 _evaluate_trees(X, self.forest.estimators_[n_half:], '<=')
             ], axis=0)
-
-    def predict_specific(self, X):
-        operator = determine_specific_operator_regression(self.X_fit_, self.y_fit_, self.forest)
-        return np.mean([tree_inference(X=X, tree=tree, operator=operator)
-                        for tree in self.forest.estimators_], axis=0)[:, 0]
 
     def predict(self, X):
         """
@@ -218,8 +247,12 @@ class OperatorRandomForestRegressor:
             return self.predict_operator(X)
         elif self.mode in ['avg_all', 'avg_half']:
             return self.predict_average(X)
-        elif self.mode == 'specific':
-            return self.predict_specific(X)
 
     def get_modes(self):
-        return ['<', '<=', 'avg_all', 'avg_half', 'specific']
+        """
+        Return the list of operating modes
+
+        Returns:
+            list(str): the list of operating modes
+        """
+        return ['<', '<=', 'avg_all', 'avg_half']
