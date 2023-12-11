@@ -49,6 +49,16 @@ def lattice_features(X: np.array, threshold=1) -> bool:
     return np.array([lattice_feature(X[:, idx], threshold) for idx in range(X.shape[1])])
 
 def count_lattice_splits(X: np.array, tree):
+    """
+    Count the lattice splits in a particular tree
+
+    Args:
+        X (np.array): the training set
+        tree (obj): the tree to calculate the lattice splits in
+
+    Returns:
+        int, int: the number of lattice splits and total splits
+    """
     lattice = lattice_features(X)
     threshold = tree.tree_.threshold
     feature = tree.tree_.feature

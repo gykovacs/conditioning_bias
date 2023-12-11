@@ -13,58 +13,19 @@ from ._lattice_feature import lattice_features
 
 __all__ = [
     'OperatorDecisionTreeClassifier',
-    'OperatorRandomForestClassifier',
-    'determine_specific_operator_classification'
+    'OperatorRandomForestClassifier'
 ]
-
-def determine_specific_operator_classification(X, y, tree, mode='normal'):
-    aucs = np.array([roc_auc_score(y, X[:, idx]) for idx in range(X.shape[1])])
-
-    if mode != 'normal':
-        operators = []
-        for auc in aucs:
-            if auc < 0.5:
-                operators.append('<=')
-            else:
-                operators.append('<')
-        return operators
-
-
-    lattice_feature_mask = lattice_features(X)
-
-    if np.sum(lattice_feature_mask) == 0:
-        return '<='
-
-    nonzero_imp_mask = tree.feature_importances_ > 0
-
-    imp = tree.feature_importances_[lattice_feature_mask & nonzero_imp_mask]
-
-    if np.sum(imp) < 1e-8:
-        return '<='
-
-    imp = imp / np.sum(imp)
-
-    weighted_aucs = imp * aucs[lattice_feature_mask & nonzero_imp_mask]
-
-    if mode == 'normal':
-        return '<' if np.sum(weighted_aucs) >= 0.5 else '<='
-        #weighted_aucs = imp * aucs[lattice_feature_mask & nonzero_imp_mask]
-    else:
-        return '<=' if np.sum(weighted_aucs) >= 0.5 else '<'
-        #weighted_aucs = (1.0 - imp) * aucs[lattice_feature_mask & nonzero_imp_mask]
-
-    #return '<' if np.sum(weighted_aucs) >= 0.5 else '<='
 
 class OperatorDecisionTreeClassifier:
     """
     A decision tree classifier with configurable splitting operator
     """
-    def __init__(self, *, mode='<=', **kwargs):
+    def __init__(self, *, mode: str = '<=', **kwargs):
         """
         The constructor of the classifier
 
         Args:
-            mode (str): '<'/'<='/'avg_full'/'avg_rand'/'specific'
+            mode (str): '<'/'<='/'avg_full'/'avg_rand'
             kwargs (dict): the keyword arguments of the base learner decision tree
         """
         self.mode = mode
@@ -73,18 +34,30 @@ class OperatorDecisionTreeClassifier:
         if not isinstance(self.random_state, np.random.RandomState):
             self.random_state = np.random.RandomState(self.random_state)
 
-    def set_mode(self, mode):
-        self.mode = mode
+    def set_mode(self, mode: str):
+        """
+        Set the mode of operation
 
-    def fit(self, X, y, sample_weight=None):
+        Args:
+            mode (str): '<'/'<='/'avg_full'/'avg_rand'
+
+        Returns:
+            OperatorDecisionTreeClassifier: the modified object
+        """
+        self.mode = mode
+        return self
+
+    def fit(self, X: np.array, y: np.array, sample_weight: np.array = None):
         """
         Fitting the classifier
 
         Args:
             X (np.array): the feature vectors to predict
+            y (np.array): the target label
+            sample_weight (np.array|None): the sample weights to be used
 
         Returns:
-            np.array: the probabilities
+            OperatorDecisionTreeClassifier: the fitted object
         """
 
         self.tree.fit(X, y, sample_weight)
@@ -97,7 +70,16 @@ class OperatorDecisionTreeClassifier:
 
         return self
 
-    def predict_proba_operator(self, X):
+    def predict_proba_operator(self, X: np.array):
+        """
+        Predict probabilities with a specific operator
+
+        Args:
+            X (np.array): the feature vectors to be predicted
+
+        Returns:
+            np.array: the predicted probabilities
+        """
         counts = tree_inference(
                 X=X,
                 tree=self.tree,
@@ -107,6 +89,15 @@ class OperatorDecisionTreeClassifier:
         return (counts.T / np.sum(counts, axis=1)).T
 
     def predict_proba_average(self, X):
+        """
+        Predict probabilities with averaging
+
+        Args:
+            X (np.array): the feature vectors to be predicted
+
+        Returns:
+            np.array: the predicted probabilities
+        """
         if self.mode == 'avg_full':
             values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, :]
             values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, :]
@@ -124,20 +115,6 @@ class OperatorDecisionTreeClassifier:
 
         return np.mean(np.array(values), axis=0)
 
-    def predict_proba_specific(self, X, mode):
-        if mode == 'specific':
-            operator = determine_specific_operator_classification(self.X_fit_, self.y_fit_, self.tree, 'normal')
-        elif mode == 'rspecific':
-            operator = determine_specific_operator_classification(self.X_fit_, self.y_fit_, self.tree, 'reversed')
-
-        counts = tree_inference(
-            X=X,
-            tree=self.tree,
-            operator=operator
-        )
-
-        return (counts.T / np.sum(counts, axis=1)).T
-
     def predict_proba(self, X):
         """
         Predicting the probabilities
@@ -153,11 +130,15 @@ class OperatorDecisionTreeClassifier:
             return self.predict_proba_operator(X)
         elif self.mode in ['avg_full', 'avg_rand']:
             return self.predict_proba_average(X)
-        elif self.mode in ['specific', 'rspecific']:
-            return self.predict_proba_specific(X, self.mode)
 
     def get_modes(self):
-        return ['<', '<=', 'avg_full', 'avg_rand', 'specific']
+        """
+        Return the list of operating modes
+
+        Returns:
+            list(str): the list of supported operating modes
+        """
+        return ['<', '<=', 'avg_full', 'avg_rand']
 
     def predict(self, X):
         """
@@ -172,7 +153,18 @@ class OperatorDecisionTreeClassifier:
 
         return np.argmax(self.predict_proba(X), axis=1)
 
-def _evaluate_trees(X, trees, operator):
+def _evaluate_trees(X: np.array, trees: list, operator: str):
+    """
+    Evaluates a list if trees
+
+    Args:
+        X (np.array): the feature vectors to predict
+        trees (list(str)): the list of trees to use for prediction
+        operator (str): the operator to be used during the prediction
+
+    Returns:
+        np.array: the predicted probabilities
+    """
     values = []
     for tree in trees:
         nodes = apply(X=X, tree=tree, operator=operator)
@@ -184,31 +176,43 @@ def _evaluate_trees(X, trees, operator):
 
 class OperatorRandomForestClassifier:
     """
-    A rendom forest classifier with configurable splitting operator
+    A random forest classifier with configurable splitting operator
     """
-    def __init__(self, *, mode='<=', **kwargs):
+    def __init__(self, *, mode: str = '<=', **kwargs):
         """
         The constructor of the classifier
 
         Args:
-            mode (str): the operator to use ('<' or '<=')
+            mode (str): the operator to use ('<'/'<='/'avg_all'/'avg_half')
             kwargs (dict): the keyword arguments of the base learner decision tree
         """
         self.mode = mode
         self.forest = RandomForestClassifier(**kwargs)
 
-    def set_mode(self, mode):
-        self.mode = mode
+    def set_mode(self, mode: str):
+        """
+        Set the mode of operation
 
-    def fit(self, X, y, sample_weight=None):
+        Args:
+            mode (str): '<'/'<='/'avg_full'/'avg_rand'
+
+        Returns:
+            OperatorRandomForestClassifier: the modified object
+        """
+        self.mode = mode
+        return self
+
+    def fit(self, X: np.array, y: np.array, sample_weight: np.array = None):
         """
         Fitting the classifier
 
         Args:
             X (np.array): the feature vectors to predict
+            y (np.array): the target label
+            sample_weight (np.array|None): the sample weights to be used
 
         Returns:
-            np.array: the probabilities
+            OperatorRandomForestClassifier: the fitted object
         """
 
         self.forest.fit(X, y, sample_weight)
@@ -220,7 +224,16 @@ class OperatorRandomForestClassifier:
 
         return self
 
-    def predict_proba_operator(self, X):
+    def predict_proba_operator(self, X: np.array):
+        """
+        Predict probabilities with a specific operator
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the predicted probabilities
+        """
         counts = np.array([tree_inference(
             X=X,
             tree=tree,
@@ -231,7 +244,16 @@ class OperatorRandomForestClassifier:
 
         return np.mean(probs, axis=0)
 
-    def predict_proba_average(self, X):
+    def predict_proba_average(self, X: np.array):
+        """
+        Predict probabilities by averaging
+
+        Args:
+            X (np.array): the feature vectors to predict
+
+        Returns:
+            np.array: the predicted probabilities
+        """
         if self.mode == 'avg_all':
             return np.mean([
                 _evaluate_trees(X, self.forest.estimators_, '<'),
@@ -246,11 +268,7 @@ class OperatorRandomForestClassifier:
                 _evaluate_trees(X, self.forest.estimators_[n_half:], '<=')
             ], axis=0)
 
-    def predict_proba_specific(self, X):
-        operator = determine_specific_operator_classification(self.X_fit_, self.y_fit_, self.forest)
-        return _evaluate_trees(X, self.forest.estimators_, operator)
-
-    def predict_proba(self, X):
+    def predict_proba(self, X: np.array):
         """
         Predicting the probabilities
 
@@ -265,13 +283,17 @@ class OperatorRandomForestClassifier:
             return self.predict_proba_operator(X)
         elif self.mode in ['avg_all', 'avg_half']:
             return self.predict_proba_average(X)
-        elif self.mode == 'specific':
-            return self.predict_proba_specific(X)
 
     def get_modes(self):
-        return ['<', '<=', 'avg_all', 'avg_half', 'specific']
+        """
+        Return the list of operating modes
 
-    def predict(self, X):
+        Returns:
+            list(str): the list of operating modes
+        """
+        return ['<', '<=', 'avg_all', 'avg_half']
+
+    def predict(self, X: np.array):
         """
         Predicting the class labels
 
