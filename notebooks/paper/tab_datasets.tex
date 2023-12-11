@@ -1,7 +1,7 @@
 \begin{tabular}{l@{\hspace{6pt}}r@{\hspace{6pt}}r@{\hspace{6pt}}r@{\hspace{6pt}}r@{\hspace{6pt}}l@{\hspace{6pt}}r@{\hspace{6pt}}l@{\hspace{6pt}}r@{\hspace{6pt}}l@{\hspace{6pt}}r@{\hspace{6pt}}r@{\hspace{6pt}}r@{\hspace{6pt}}l@{\hspace{6pt}}r@{\hspace{6pt}}l@{\hspace{6pt}}r}
 \toprule
 \multicolumn{9}{c}{Classification} & \multicolumn{8}{c}{Regression} \\
-name & N & $N_a$ & $N_l$ & $N_m$ & par$_t$ & auc$_t$ & par$_f$ & auc$_f$ & name & N & $N_a$ & $N_l$ & par$_t$ & r$^2_t$ & par$_f$ & r$^2_f$ \\
+dataset & N & $N_a$ & $N_l$ & $N_m$ & par$_t$ & auc$_t$ & par$_f$ & auc$_f$ & dataset & N & $N_a$ & $N_l$ & par$_t$ & r$^2_t$ & par$_f$ & r$^2_f$ \\
 \midrule
 appendicitis \cite{keel} & 106 & 7 & 7 & 21 & $\alpha$: 16 & 0.775 & $\alpha$: 16 & 0.852 & diabetes \cite{keel} & 43 & 2 & 2 & $\alpha$: 6 & -0.375 & $\beta$: 2 & -0.083 \\
 haberman \cite{keel} & 306 & 3 & 3 & 81 & $\alpha$: 22 & 0.662 & $\alpha$: 13 & 0.721 & o-ring \cite{uci} & 23 & 6 & 4 & $\alpha$: 1 & 0.127 & $\beta$: 2 & 0.150 \\
@@ -15,12 +15,12 @@ poker-9-vs-7 \cite{keel} & 244 & 10 & 10 & 8 & $\alpha$: 17 & 0.682 & $\beta$: 4
 monk-2 \cite{keel} & 432 & 6 & 4 & 204 & $\alpha$: 2 & 1.000 & $\alpha$: 2 & 1.000 & real-estate-valuation \cite{uci} & 414 & 6 & 5 & $\alpha$: 6 & 0.658 & $\alpha$: 4 & 0.709 \\
 hepatitis \cite{krnn} & 155 & 19 & 6 & 32 & $\alpha$: 6 & 0.744 & $\beta$: 2 & 0.871 & wankara \cite{keel} & 321 & 9 & 9 & $\alpha$: 2 & 0.972 & $\beta$: 9 & 0.987 \\
 yeast-0-3-5-9-vs-7-8 \cite{keel} & 506 & 8 & 6 & 50 & $\alpha$: 9 & 0.737 & $\alpha$: 4 & 0.810 & plastic \cite{keel} & 1650 & 2 & 2 & $\alpha$: 9 & 0.766 & $\alpha$: 9 & 0.789 \\
-mammographic \cite{keel} & 830 & 5 & 5 & 403 & $\alpha$: 46 & 0.900 & $\beta$: 3 & 0.912 & laser \cite{keel} & 993 & 4 & 4 & $\alpha$: 3 & 0.922 &  & 0.963 \\
+mammographic \cite{keel} & 830 & 5 & 5 & 403 & $\alpha$: 46 & 0.900 & $\beta$: 3 & 0.912 & laser \cite{keel} & 993 & 4 & 4 & $\alpha$: 3 & 0.922 & $\beta$: $\infty$ & 0.963 \\
 saheart \cite{keel} & 462 & 9 & 8 & 160 & $\alpha$: 25 & 0.719 & $\beta$: 3 & 0.755 & qsar-aquatic-toxicity \cite{uci} & 546 & 8 & 8 & $\alpha$: 17 & 0.355 & $\beta$: 14 & 0.525 \\
 page-blocks-1-3-vs-4 \cite{keel} & 472 & 10 & 10 & 28 & $\alpha$: 15 & 0.976 & $\beta$: 12 & 0.999 & baseball \cite{keel} & 337 & 16 & 12 & $\alpha$: 8 & 0.641 & $\beta$: 5 & 0.680 \\
-pima \cite{keel} & 768 & 8 & 8 & 268 & $\alpha$: 33 & 0.805 & $\beta$: 5 & 0.836 & maternal-health-risk \cite{uci} & 1013 & 6 & 6 &  & 0.713 &  & 0.749 \\
+pima \cite{keel} & 768 & 8 & 8 & 268 & $\alpha$: 33 & 0.805 & $\beta$: 5 & 0.836 & maternal-health-risk \cite{uci} & 1013 & 6 & 6 & $\beta$: $\infty$ & 0.713 & $\beta$: $\infty$ & 0.749 \\
 wisconsin \cite{keel} & 683 & 9 & 9 & 239 & $\alpha$: 13 & 0.983 & $\alpha$: 2 & 0.993 & cpu-performance \cite{krnn} & 209 & 35 & 6 & $\beta$: 8 & 0.812 & $\beta$: 13 & 0.870 \\
-abalone9-18 \cite{keel} & 731 & 9 & 7 & 42 & $\alpha$: 116 & 0.758 & $\alpha$: 4 & 0.850 & airfoil \cite{krnn} & 1503 & 5 & 4 & $\beta$: 15 & 0.861 &  & 0.934 \\
+abalone9-18 \cite{keel} & 731 & 9 & 7 & 42 & $\alpha$: 116 & 0.758 & $\alpha$: 4 & 0.850 & airfoil \cite{krnn} & 1503 & 5 & 4 & $\beta$: 15 & 0.861 & $\beta$: $\infty$ & 0.934 \\
 winequality-red-3-vs-5 \cite{keel} & 691 & 11 & 11 & 10 & $\alpha$: 85 & 0.815 & $\alpha$: 17 & 0.870 & medical-cost \cite{mlwithr} & 1338 & 6 & 2 & $\beta$: 3 & 0.761 & $\beta$: 3 & 0.765 \\
 \bottomrule
 \end{tabular}

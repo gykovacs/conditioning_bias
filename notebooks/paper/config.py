@@ -5,6 +5,8 @@ n_bounds_regr = (1, 2000)
 n_from_phenotypes = 1
 n_splits = 5
 n_repeats = 400
+n_splits_10 = 10
+n_repeats_10 = 200
 
 dataset_map = {
     'lymphography-normal-fibrosis': 'lymphography',

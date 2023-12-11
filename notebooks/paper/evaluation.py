@@ -41,7 +41,11 @@ def evaluate_classification(*,
         X = X[mask]
         y = y[mask]
 
-        validator = RepeatedStratifiedKFold(**validator_params)
+        vp_tmp = validator_params.copy()
+        if vp_tmp['n_splits'] > np.sum(y):
+            vp_tmp['n_splits'] = np.sum(y)
+
+        validator = RepeatedStratifiedKFold(**vp_tmp)
 
         for fdx, (train, test) in enumerate(validator.split(X, y, y)):
             X_train = X[train]
