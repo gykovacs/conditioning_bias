@@ -13,7 +13,7 @@ n_repeats = 400
 
 # cross-validation for model selection
 n_splits_ms = 5
-n_splits_ms = 20
+n_repeats_ms = 20
 
 # the random seed to use
 random_seed = 5
