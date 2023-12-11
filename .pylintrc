@@ -1,0 +1,8 @@
+[BASIC]
+good-names=X,X_fit_,X_test
+
+[TYPECHECK]
+ignored-modules = numpy
+
+# Minimum lines number of a similarity.
+min-similarity-lines=30
