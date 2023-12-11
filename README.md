@@ -65,7 +65,7 @@ The main steps of the study are arranged as individual Jupyter notebooks. In ord
 
 #### Configuration
 
-The entire experiment can be configured by overwriting the variables in the `study/config.py` module.
+The entire experiment can be configured by overwriting the variables in the (study/config.py)[study/config.py] module.
 
 #### Datasets
 
