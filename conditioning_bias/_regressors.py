@@ -6,21 +6,19 @@ import numpy as np
 
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import roc_auc_score
+from sklearn.base import RegressorMixin
 
 from ._tree_inference import tree_inference, apply
-from ._lattice_feature import lattice_features
 
-__all__ = [
-    'OperatorDecisionTreeRegressor',
-    'OperatorRandomForestRegressor'
-]
+__all__ = ["OperatorDecisionTreeRegressor", "OperatorRandomForestRegressor"]
 
-class OperatorDecisionTreeRegressor:
+
+class OperatorDecisionTreeRegressor(RegressorMixin):
     """
     A decision tree regressor with configurable splitting operator
     """
-    def __init__(self, *, mode='<=', **kwargs):
+
+    def __init__(self, *, mode="<=", **kwargs):
         """
         The constructor of the regressor
 
@@ -30,9 +28,12 @@ class OperatorDecisionTreeRegressor:
         """
         self.mode = mode
         self.tree = DecisionTreeRegressor(**kwargs)
-        self.random_state = kwargs.get('random_state')
+        self.random_state = kwargs.get("random_state")
+
         if not isinstance(self.random_state, np.random.RandomState):
             self.random_state = np.random.RandomState(self.random_state)
+
+        self.feature_importances_ = None
 
     def set_mode(self, mode: str):
         """
@@ -63,9 +64,6 @@ class OperatorDecisionTreeRegressor:
         self.tree.fit(X, y, sample_weight)
         self.feature_importances_ = self.tree.feature_importances_
 
-        self.X_fit_ = X
-        self.y_fit_ = y
-
         return self
 
     def predict_operator(self, X: np.array):
@@ -78,11 +76,7 @@ class OperatorDecisionTreeRegressor:
         Returns:
             np.array: the predictions
         """
-        return tree_inference(
-                X=X,
-                tree=self.tree,
-                operator=self.mode
-            )[:, 0]
+        return tree_inference(X=X, tree=self.tree, operator=self.mode)[:, 0]
 
     def predict_average(self, X: np.array):
         """
@@ -94,19 +88,24 @@ class OperatorDecisionTreeRegressor:
         Returns:
             np.array: the predictions
         """
-        if self.mode == 'avg_full':
-            values_le = self.tree.tree_.value[apply(X, self.tree, '<')][:, 0, 0]
-            values_leq = self.tree.tree_.value[apply(X, self.tree, '<=')][:, 0, 0]
+        if self.mode == "avg_full":
+            values_le = self.tree.tree_.value[apply(X, self.tree, "<")][:, 0, 0]
+            values_leq = self.tree.tree_.value[apply(X, self.tree, "<=")][:, 0, 0]
 
             values = np.mean(np.array([values_le, values_leq]), axis=0)
 
             return values
-        else:
-            values = [self.tree.tree_.value[apply(X, self.tree, None, self.random_state)][:, 0, 0]
-                        for _ in range(10)]
-            values = np.mean(values, axis=0)
 
-            return values
+        # the 'avg_rand' branch
+        values = [
+            self.tree.tree_.value[apply(X, self.tree, None, self.random_state)][
+                :, 0, 0
+            ]
+            for _ in range(10)
+        ]
+        values = np.mean(values, axis=0)
+
+        return values
 
     def predict(self, X: np.array):
         """
@@ -119,13 +118,21 @@ class OperatorDecisionTreeRegressor:
             np.array: the values
         """
 
-        if self.mode in ['<', '<=']:
+        if self.mode in ["<", "<="]:
             return self.predict_operator(X)
-        elif self.mode in ['avg_full', 'avg_rand']:
-            return self.predict_average(X)
+
+        #elif self.mode in ["avg_full", "avg_rand"]:
+        return self.predict_average(X)
 
     def get_modes(self):
-        return ['<', '<=', 'avg_full', 'avg_rand']
+        """
+        Returns the modes of operation
+
+        Returns:
+            list(str): the modes of operation
+        """
+        return ["<", "<=", "avg_full", "avg_rand"]
+
 
 def _evaluate_trees(X: np.array, trees: list, operator: str):
     """
@@ -146,11 +153,13 @@ def _evaluate_trees(X: np.array, trees: list, operator: str):
 
     return np.mean(values, axis=0)
 
-class OperatorRandomForestRegressor:
+
+class OperatorRandomForestRegressor(RegressorMixin):
     """
     A random forest regressor with configurable splitting operator
     """
-    def __init__(self, *, mode='<=', **kwargs):
+
+    def __init__(self, *, mode="<=", **kwargs):
         """
         The constructor of the regressor
 
@@ -160,6 +169,8 @@ class OperatorRandomForestRegressor:
         """
         self.mode = mode
         self.forest = RandomForestRegressor(**kwargs)
+
+        self.feature_importances_ = None
 
     def set_mode(self, mode):
         """
@@ -190,9 +201,6 @@ class OperatorRandomForestRegressor:
         self.forest.fit(X, y, sample_weight)
         self.feature_importances_ = self.forest.feature_importances_
 
-        self.X_fit_ = X
-        self.y_fit_ = y
-
         return self
 
     def predict_operator(self, X):
@@ -205,8 +213,13 @@ class OperatorRandomForestRegressor:
         Returns:
             np.array: the predictions
         """
-        return np.mean([tree_inference(X=X, tree=tree, operator=self.mode)
-                        for tree in self.forest.estimators_], axis=0)[:, 0]
+        return np.mean(
+            [
+                tree_inference(X=X, tree=tree, operator=self.mode)
+                for tree in self.forest.estimators_
+            ],
+            axis=0,
+        )[:, 0]
 
     def predict_average(self, X):
         """
@@ -218,19 +231,25 @@ class OperatorRandomForestRegressor:
         Returns:
             np.array: the predictions
         """
-        if self.mode == 'avg_all':
-            return np.mean([
-                _evaluate_trees(X, self.forest.estimators_, '<'),
-                _evaluate_trees(X, self.forest.estimators_, '<=')
-            ], axis=0)
+        if self.mode == "avg_all":
+            return np.mean(
+                [
+                    _evaluate_trees(X, self.forest.estimators_, "<"),
+                    _evaluate_trees(X, self.forest.estimators_, "<="),
+                ],
+                axis=0,
+            )
 
         n_estimators = len(self.forest.estimators_)
-        n_half = int(n_estimators/2)
+        n_half = int(n_estimators / 2)
 
-        return np.mean([
-                _evaluate_trees(X, self.forest.estimators_[:n_half], '<'),
-                _evaluate_trees(X, self.forest.estimators_[n_half:], '<=')
-            ], axis=0)
+        return np.mean(
+            [
+                _evaluate_trees(X, self.forest.estimators_[:n_half], "<"),
+                _evaluate_trees(X, self.forest.estimators_[n_half:], "<="),
+            ],
+            axis=0,
+        )
 
     def predict(self, X):
         """
@@ -243,10 +262,11 @@ class OperatorRandomForestRegressor:
             np.array: the values
         """
 
-        if self.mode in ['<', '<=']:
+        if self.mode in ["<", "<="]:
             return self.predict_operator(X)
-        elif self.mode in ['avg_all', 'avg_half']:
-            return self.predict_average(X)
+
+        #elif self.mode in ["avg_all", "avg_half"]:
+        return self.predict_average(X)
 
     def get_modes(self):
         """
@@ -255,4 +275,4 @@ class OperatorRandomForestRegressor:
         Returns:
             list(str): the list of operating modes
         """
-        return ['<', '<=', 'avg_all', 'avg_half']
+        return ["<", "<=", "avg_all", "avg_half"]

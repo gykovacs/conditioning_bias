@@ -9,6 +9,7 @@ from sklearn.datasets import load_iris
 
 from conditioning_bias import lattice_features, count_lattice_splits
 
+
 def test_lattice_features():
     """
     Testing the lattice features function
@@ -20,14 +21,15 @@ def test_lattice_features():
 
     assert np.all(flags == np.array([True, False]))
 
+
 def test_count_lattice_splits():
     """
     Testing the counting of lattice splits
     """
 
     dataset = load_iris()
-    X = dataset['data']
-    y = dataset['target']
+    X = dataset["data"]
+    y = dataset["target"]
 
     random_state = np.random.RandomState(5)
 

@@ -4,63 +4,63 @@ This module implements the tree inference methods
 
 import numpy as np
 
-__all__ = ['tree_inference', 'apply']
+__all__ = ["tree_inference", "apply"]
 
-def apply(X: np.array, tree, operator: str = '<=', random_state=None) -> np.array:
-        """
-        Implement the inference in a tree
 
-        Args:
-            X (np.array(float)): the array of feature vectors to infer
-            tree (np.array(float)): the fitted tree
-            operator (str): the splitting operator to be used
+def apply(X: np.array, tree, operator: str = "<=", random_state=None) -> np.array:
+    """
+    Implement the inference in a tree
 
-        Returns:
-            np.array(int): the leaf node indices belonging to the vectors
-        """
+    Args:
+        X (np.array(float)): the array of feature vectors to infer
+        tree (np.array(float)): the fitted tree
+        operator (str): the splitting operator to be used
 
-        # allocating the buffer to keep track of the inference in the tree
-        node_ids = np.repeat(0, X.shape[0])
-        leaf_node_flag = tree.tree_.children_left == tree.tree_.children_right
+    Returns:
+        np.array(int): the leaf node indices belonging to the vectors
+    """
 
-        if not isinstance(random_state, np.random.RandomState):
-            random_state = np.random.RandomState(random_state)
+    # allocating the buffer to keep track of the inference in the tree
+    node_ids = np.repeat(0, X.shape[0])
+    leaf_node_flag = tree.tree_.children_left == tree.tree_.children_right
 
-        while not np.all(leaf_node_flag[node_ids]):
-            # the indices of vectors not at leaf nodes yet
-            active_indices = np.where(~leaf_node_flag[node_ids])[0]
+    if not isinstance(random_state, np.random.RandomState):
+        random_state = np.random.RandomState(random_state)
 
-            # the actual nodes where these vectors are
-            active_nodes = node_ids[active_indices]
+    while not np.all(leaf_node_flag[node_ids]):
+        # the indices of vectors not at leaf nodes yet
+        active_indices = np.where(~leaf_node_flag[node_ids])[0]
 
-            # do the branching
-            feature = tree.tree_.feature[active_nodes]
-            threshold = tree.tree_.threshold[active_nodes]
+        # the actual nodes where these vectors are
+        active_nodes = node_ids[active_indices]
 
-            if operator is not None:
-                if operator == '<=':
-                    left = X[active_indices, feature] <= threshold
-                else:
-                    left = X[active_indices, feature] < threshold
+        # do the branching
+        feature = tree.tree_.feature[active_nodes]
+        threshold = tree.tree_.threshold[active_nodes]
+
+        if operator is not None:
+            if operator == "<=":
+                left = X[active_indices, feature] <= threshold
             else:
-                if random_state.randint(2) == 0:
-                    left = X[active_indices, feature] <= threshold
-                else:
-                    left = X[active_indices, feature] < threshold
+                left = X[active_indices, feature] < threshold
+        else:
+            if random_state.randint(2) == 0:
+                left = X[active_indices, feature] <= threshold
+            else:
+                left = X[active_indices, feature] < threshold
 
-            # update the nodes where the vectors are
-            active_nodes[left] = tree.tree_.children_left[active_nodes[left]]
-            active_nodes[~left] = tree.tree_.children_right[active_nodes[~left]]
+        # update the nodes where the vectors are
+        active_nodes[left] = tree.tree_.children_left[active_nodes[left]]
+        active_nodes[~left] = tree.tree_.children_right[active_nodes[~left]]
 
-            node_ids[active_indices] = active_nodes
+        node_ids[active_indices] = active_nodes
 
-        return node_ids
+    return node_ids
 
-def tree_inference(*,
-    X: np.array,
-    tree,
-    operator: str = '<=',
-    random_state = None) -> np.array:
+
+def tree_inference(
+    *, X: np.array, tree, operator: str = "<=", random_state=None
+) -> np.array:
     """
     Implement the inference in a tree
 
