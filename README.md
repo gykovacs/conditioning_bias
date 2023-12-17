@@ -8,7 +8,7 @@ Citation:
 
 ```bibtex
 @article{conditioning-bias,
-    author = {G\'abor T\'im\'ar and Gy\"orgy Kov\'acs},
+    author = {G\'abor Tim\'ar and Gy\"orgy Kov\'acs},
     title = {The Conditioning Bias in Binary Decision Trees and Random Forests and Its Elimination},
     year = {2023}
 }
