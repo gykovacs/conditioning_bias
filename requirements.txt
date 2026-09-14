@@ -8,3 +8,5 @@ kaleido
 jinja2
 common-datasets
 pytest-cov
+matplotlib
+seaborn

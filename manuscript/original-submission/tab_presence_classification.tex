@@ -1,0 +1,28 @@
+\begin{tabular}{l@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}c@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}c@{\hspace{4pt}}l@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}c@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}r@{\hspace{4pt}}c}
+\toprule
+\multicolumn{9}{c}{Classification} \\
+dataset & \multicolumn{4}{c}{Decision Tree} & \multicolumn{4}{c}{Random Forest} \\
+ & $\rho$ & $\rho_{k}$ & auc$_{d}$ & p$_{\neq}$ & $\rho$ & $\rho_{k}$ & auc$_{d}$ & p$_{\neq}$ \\
+\midrule
+appendicitis & 0 & .01 &  0 &  & .02 & .03 & -4e-06 &  \\
+haberman & 0 & .03 & -3e-04 & $\ast$ & .04 & .05 &  6e-06 &  \\
+new-thyroid1 & 0 & .01 &  4e-06 &  & .07 & .09 &  8e-05 & $\ast$ \\
+glass0 & 0 & .03 &  0 &  & .05 & .04 & -2e-05 &  \\
+shuttle-6-vs-2-3 & 0 & 0 &  0 &  & .14 & .13 &  0 &  \\
+bupa & .12 & .11 &  1e-04 & $\ast$ & .25 & .24 &  2e-03 & $\ast$ \\
+cleveland-0-vs-4 & 0 & .01 & -3e-03 &  & .09 & .10 & -8e-04 & $\ast$ \\
+ecoli1 & 0 & .05 &  0 &  & .12 & .12 & -7e-05 & $\ast$ \\
+poker-9-vs-7 & 0 & 0 &  0 &  & .14 & .17 & -2e-03 & $\ast$ \\
+monk-2 & 0 & 0 &  0 &  & .00 & .00 &  0 &  \\
+hepatitis & 0 & .06 & -2e-04 &  & .03 & .04 & -3e-04 & $\ast$ \\
+yeast-0-3-5-9-vs-7-8 & 0 & .04 & -4e-05 &  & .09 & .09 & -2e-04 & $\ast$ \\
+mammographic & 0 & .01 &  3e-05 & $\ast$ & .02 & .04 &  6e-07 & $\ast$ \\
+saheart & 0 & .04 & -8e-06 & $\ast$ & .07 & .08 &  6e-05 & $\ast$ \\
+page-blocks-1-3-vs-4 & .25 & .07 &  1e-04 & $\ast$ & .06 & .06 & -4e-06 &  \\
+lymphography & 0 & 0 & -4e-03 &  & .04 & .04 & -1e-03 & $\ast$ \\
+pima & 0 & .06 & -3e-04 & $\ast$ & .16 & .19 &  4e-06 &  \\
+wisconsin & 0 & .02 & -1e-04 & $\ast$ & .09 & .12 &  4e-05 &  \\
+abalone9-18 & 0 & 0 &  0 &  & .08 & .08 & -1e-06 &  \\
+winequality-red-3-vs-5 & 0 & 0 &  0 &  & .07 & .07 & -4e-04 & $\ast$ \\
+\bottomrule
+\end{tabular}

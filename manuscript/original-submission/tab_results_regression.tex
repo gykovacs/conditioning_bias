@@ -1,0 +1,28 @@
+\begin{tabular}{l@{\hspace{4pt}}l@{\hspace{4pt}}l@{\hspace{4pt}}l@{\hspace{4pt}}l@{\hspace{8pt}}l@{\hspace{4pt}}l@{\hspace{4pt}}l@{\hspace{4pt}}l}
+\toprule
+\multicolumn{9}{c}{Regression} \\
+dataset & \multicolumn{4}{c}{Decision Tree} & \multicolumn{4}{c}{Random Forest} \\
+ & p$_{\neq}$ & p$_{\leq}$ & p$_{<}$ & r$^2_{d}$ & p$_{\neq}$ & p$_{\leq}$ & p$_{<}$ & r$^2_{d}$ \\
+\midrule
+diabetes &  &  &  &  & $\ast$ & - & + & 3.3e-04 \\
+o-ring & $\ast$ & + & - & 2.2e-03 & $\ast$ & + & - & 1.5e-02 \\
+stock-portfolio &  &  &  &  & $\ast$ & - & + & 1.7e-05 \\
+wsn-ale &  &  &  &  & $\ast$ & + & - & 5.8e-04 \\
+daily-demand & $\ast$ & + & - & 2.3e-04 & $\ast$ & + & - & 3.5e-04 \\
+slump-test & $\ast$ & + & - & 1.0e-03 & $\ast$ & + & - & 3.0e-04 \\
+servo &  &  &  &  & $\ast$ & + & - & 4.3e-06 \\
+yacht-hydrodynamics &  &  &  &  &  &  &  &  \\
+autoMPG6 & $\ast$ & + &  & 2.9e-04 &  & + & + & 6.9e-05 \\
+excitation-current & $\ast$ & + & + & 2.6e-07 & $\ast$ &  & + & 2.1e-07 \\
+real-estate-valuation & $\ast$ & + &  & 3.2e-04 &  &  & + & 8.8e-06 \\
+wankara & $\ast$ & + &  & 5.5e-05 & $\ast$ & + & - & 1.7e-05 \\
+plastic & $\ast$ & - & + & 7.7e-04 & $\ast$ & - & + & 3.6e-04 \\
+laser & $\ast$ & + & + & 1.6e-03 & $\ast$ & + & + & 2.2e-04 \\
+qsar-aquatic-toxicity &  &  &  &  & $\ast$ & + & - & 1.9e-04 \\
+baseball &  & + & + & 2.2e-03 & $\ast$ & - & + & 5.3e-04 \\
+maternal-health-risk & $\ast$ & - & + & 1.5e-03 & $\ast$ & + & - & 5.5e-04 \\
+cpu-performance & $\ast$ &  & + & 5.6e-03 & $\ast$ & - & + & 1.6e-03 \\
+airfoil & $\ast$ & - & + & 2.1e-05 & $\ast$ & + & - & 5.1e-06 \\
+medical-cost &  &  &  &  & $\ast$ & - &  & 1.1e-06 \\
+\bottomrule
+\end{tabular}

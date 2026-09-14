@@ -1,0 +1,50 @@
+\begin{tabular}{l@{\hspace{3pt}}r@{\hspace{3pt}}r@{\hspace{3pt}}r@{\hspace{3pt}}r@{\hspace{3pt}}r@{\hspace{3pt}}c@{\hspace{3pt}}r@{\hspace{3pt}}c}
+\toprule
+\multicolumn{9}{c}{Regression} \\
+dataset & $\rho$ & $\rho_{k}$ & r$^2_{\leq}$ & r$^2_{<}$ & r$^2_{d}$ & p$_{\neq}$ & r$^2_{avg}$ & p$_{avg}$ \\
+\midrule
+\multicolumn{9}{l}{\emph{Decision Tree}} \\
+stock-portfolio & .05 & .03 & 0.992 & 0.992 & 0 &  & 0.992 &  \\
+wsn-ale & .13 & .15 & 0.350 & 0.340 &  1e-02 &  & 0.349 &  \\
+daily-demand & .03 & .03 & 0.634 & 0.634 & -3e-04 &  & 0.634 &  \\
+slump-test & .21 & .16 & 0.561 & 0.563 & -2e-03 &  & 0.563 &  \\
+servo & 0 & .00 & 0.454 & 0.454 & -1e-05 &  & 0.454 &  \\
+yacht-hydrodynamics & .03 & .03 & 0.992 & 0.992 & 0 &  & 0.992 &  \\
+autoMPG6 & .23 & .21 & 0.801 & 0.802 & -6e-04 &  & 0.802 &  \\
+excitation-current & .21 & .22 & 1.000 & 1.000 & -4e-08 &  & 1.000 &  \\
+real-estate-valuation & .43 & .42 & 0.564 & 0.565 & -3e-04 &  & 0.565 &  \\
+wankara & .24 & .24 & 0.971 & 0.971 & -5e-05 &  & 0.971 &  \\
+plastic & .05 & .09 & 0.715 & 0.713 &  2e-03 &  & 0.714 & $\ast$ \\
+laser & .37 & .36 & 0.916 & 0.916 & -8e-04 &  & 0.917 & $\ast$ \\
+qsar-aquatic-toxicity & .07 & .07 & 0.304 & 0.304 & 0 &  & 0.304 &  \\
+baseball & .38 & .36 & 0.617 & 0.614 &  2e-03 &  & 0.617 &  \\
+maternal-health-risk & .23 & .25 & 0.729 & 0.726 &  2e-03 &  & 0.728 &  \\
+cpu-performance & .26 & .22 & 0.760 & 0.751 &  9e-03 &  & 0.760 &  \\
+airfoil & .01 & .01 & 0.877 & 0.877 &  2e-05 &  & 0.877 &  \\
+medical-cost & .16 & .16 & 0.763 & 0.763 & 0 &  & 0.763 &  \\
+boom-bikes & .15 & .14 & 0.988 & 0.988 &  5e-05 &  & 0.988 &  \\
+concrete & .08 & .09 & 0.862 & 0.862 &  1e-04 &  & 0.862 &  \\
+\midrule
+\multicolumn{9}{l}{\emph{Random Forest}} \\
+stock-portfolio & .02 & .03 & 0.994 & 0.994 &  2e-05 &  & 0.994 &  \\
+wsn-ale & .16 & .16 & 0.575 & 0.579 & -4e-03 &  & 0.577 &  \\
+daily-demand & .03 & .03 & 0.815 & 0.815 & -1e-04 &  & 0.815 &  \\
+slump-test & .19 & .16 & 0.785 & 0.786 & -1e-03 &  & 0.786 & $\ast$ \\
+servo & .00 & .01 & 0.560 & 0.560 & -2e-06 &  & 0.560 &  \\
+yacht-hydrodynamics & .03 & .03 & 0.995 & 0.995 & 0 &  & 0.995 &  \\
+autoMPG6 & .23 & .22 & 0.877 & 0.878 & -4e-04 &  & 0.878 & $\ast$ \\
+excitation-current & .26 & .26 & 1.000 & 1.000 &  2e-07 &  & 1.000 &  \\
+real-estate-valuation & .43 & .43 & 0.681 & 0.681 & -2e-04 &  & 0.681 & $\ast$ \\
+wankara & .26 & .25 & 0.988 & 0.988 & -5e-05 &  & 0.988 &  \\
+plastic & .13 & .15 & 0.770 & 0.770 &  5e-04 &  & 0.770 & $\ast$ \\
+laser & .38 & .38 & 0.963 & 0.963 & -6e-04 &  & 0.963 &  \\
+qsar-aquatic-toxicity & .07 & .07 & 0.519 & 0.519 & -4e-04 &  & 0.519 &  \\
+baseball & .38 & .36 & 0.669 & 0.668 &  7e-04 &  & 0.669 & $\ast$ \\
+maternal-health-risk & .27 & .26 & 0.756 & 0.756 & -4e-04 &  & 0.756 & $\ast$ \\
+cpu-performance & .25 & .23 & 0.849 & 0.842 &  7e-03 &  & 0.847 &  \\
+airfoil & .01 & .01 & 0.943 & 0.943 & -7e-06 &  & 0.943 &  \\
+medical-cost & .19 & .18 & 0.767 & 0.767 & -3e-06 &  & 0.767 &  \\
+boom-bikes & .15 & .13 & 0.996 & 0.996 & -1e-06 &  & 0.996 & $\ast$ \\
+concrete & .10 & .09 & 0.917 & 0.917 &  5e-05 &  & 0.917 &  \\
+\bottomrule
+\end{tabular}

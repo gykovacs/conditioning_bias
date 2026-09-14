@@ -1,0 +1,18 @@
+\begin{tabular}{l@{\hspace{6pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}c@{\hspace{10pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}c@{\hspace{10pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}c@{\hspace{10pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}c}
+\toprule
+& \multicolumn{5}{c}{DT classif.} & \multicolumn{5}{c}{RF classif.} & \multicolumn{5}{c}{DT regr.} & \multicolumn{5}{c}{RF regr.} \\
+value & $s_{avg}$ & $s_{worst}$ & diff & $p$ &  & $s_{avg}$ & $s_{worst}$ & diff & $p$ &  & $s_{avg}$ & $s_{worst}$ & diff & $p$ &  & $s_{avg}$ & $s_{worst}$ & diff & $p$ &  \\
+\midrule
+\multicolumn{21}{l}{\emph{Domain-size sweep (max depth fixed at 8)}} \\
+5 & 0.846 & 0.846 & 1.8e-04 & 7.0e-02 &  & 0.961 & 0.961 & 6.5e-05 & 1.3e-10 & $\ast$ & 0.740 & 0.740 & 1.9e-04 & 2.3e-06 & $\ast$ & 0.876 & 0.876 & 5.2e-05 & 1.9e-11 & $\ast$ \\
+11 & 0.900 & 0.899 & 7.9e-04 & 4.1e-07 & $\ast$ & 0.984 & 0.984 & 1.0e-04 & 7.7e-14 & $\ast$ & 0.863 & 0.863 & 1.4e-04 & 2.3e-10 & $\ast$ & 0.938 & 0.938 & 4.0e-05 & 2.1e-13 & $\ast$ \\
+21 & 0.941 & 0.941 & 3.6e-04 & 1.2e-05 & $\ast$ & 0.993 & 0.993 & 9.4e-05 & 2.2e-10 & $\ast$ & 0.943 & 0.943 & 7.0e-05 & 5.9e-15 & $\ast$ & 0.975 & 0.975 & 2.9e-05 & 1.5e-14 & $\ast$ \\
+51 & 0.972 & 0.972 & 9.9e-05 & 3.3e-02 & $\ast$ & 0.998 & 0.998 & 1.3e-04 & 1.9e-14 & $\ast$ & 0.986 & 0.986 & 4.0e-05 & 2.9e-17 & $\ast$ & 0.993 & 0.993 & 1.5e-05 & 3.3e-15 & $\ast$ \\
+\midrule
+\multicolumn{21}{l}{\emph{Depth sweep (domain size fixed at 11)}} \\
+3 & 0.924 & 0.924 & 5.8e-05 & 7.0e-01 &  & 0.973 & 0.973 & 4.5e-05 & 2.1e-08 & $\ast$ & 0.744 & 0.744 & 0 & 1 &  & 0.819 & 0.819 & 4.4e-18 & 5.0e-01 &  \\
+5 & 0.921 & 0.921 & 4.3e-04 & 8.7e-04 & $\ast$ & 0.981 & 0.981 & 8.1e-05 & 1.4e-13 & $\ast$ & 0.819 & 0.819 & 1.0e-05 & 7.0e-01 &  & 0.904 & 0.904 & 1.4e-05 & 7.4e-07 & $\ast$ \\
+8 & 0.900 & 0.900 & 5.4e-04 & 7.3e-07 & $\ast$ & 0.983 & 0.983 & 1.2e-04 & 3.2e-13 & $\ast$ & 0.864 & 0.864 & 1.4e-04 & 2.3e-13 & $\ast$ & 0.939 & 0.939 & 4.2e-05 & 3.8e-10 & $\ast$ \\
+12 & 0.897 & 0.897 & 4.8e-04 & 4.1e-07 & $\ast$ & 0.983 & 0.983 & 1.0e-04 & 4.6e-14 & $\ast$ & 0.866 & 0.865 & 1.6e-04 & 6.2e-17 & $\ast$ & 0.942 & 0.942 & 4.2e-05 & 6.9e-12 & $\ast$ \\
+\bottomrule
+\end{tabular}

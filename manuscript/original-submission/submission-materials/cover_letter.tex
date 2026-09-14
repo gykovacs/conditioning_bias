@@ -1,0 +1,14 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\title{Cover letter for paper "The Conditioning Bias in Binary Decision Trees and Random Forests and Its Elimination" submitted to Springer Machine Learning}
+\author{Gy\"orgy Kov\'acs and G\'abor Tim\'ar}
+\begin{document}
+\maketitle
+The paper is about a bias in CART-type decision trees and derivative techniques, when features with small domains consisting of equidistant values are present. This type of feature is very common in practice, for instance, the \emph{age} feature in medical datasets is susciptible to the bias.
+
+The bias is present in the most popular implementations, like the Python \emph{sklearn} and R \emph{tree} packages. To prove the presence of the bias and 
+
+The bias can be eliminated by integrating out the effect of the conditioning operator. In random forests, this occur no costs, therefore, it is a \emph{free lunch} improvement of random forest predictions.
+
+Due to the popularity and countless applications of decision trees and random forests, we believe that the bringing attention to this bias and proposing methods for its elimination is an important topic to be discussed in the journal Machine Learning.
+\end{document}

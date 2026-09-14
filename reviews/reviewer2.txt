@@ -1,0 +1,6 @@
+The idea behind the paper is interesting, although the text is needlessly verbose.
+The promised reproducible code  is a typical "code drop" which is not at all reproducible; proper distribution is a collection of scripts automatically producing presented artefacts, not a bunch of half-executed Jupyter notebooks.
+
+My main concern is the use of paired test, though; this is a controversial approach in the field because of the non-independence of folds. Using the data provided by authors on GitHub, it seems that overall CV error distributions for modes are virtually identical, with predominantly non-significant differences under the fairer unpaired test. This is in agreement with very small error measure deltas.
+
+To this end, I think this paper should not be accepted without some more solid evaluation (nested CV / synthetic data) and corresponding alterations to the discussion.

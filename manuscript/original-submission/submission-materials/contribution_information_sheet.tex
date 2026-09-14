@@ -1,0 +1,64 @@
+
+\documentclass{article}
+
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+
+\title{Contribution Information Sheet for the paper "The Conditioning Bias in Binary Decision Trees and Random Forests and Its Elimination" submitted to Springer Machine Learning}
+\author{G\'abor Tim\'ar and Gy\"orgy Kov\'acs}
+\begin{document}
+\maketitle
+
+\section{The main claims}
+
+\begin{quote}
+    "What is the main claim of the paper? Why is this an important contribution to the machine learning literature?"
+\end{quote}
+The main claims of the paper:
+\begin{itemize}
+\item \emph{Identification of an unnoticed bias}: The paper identifies an unnoticed bias present when CART-type decision trees are applied to data featuring at least one attribute characterized by a small, equidistant domain. This bias arises from thresholds within the tree aligning with the feature domain, thereby rendering predictions dependent on the conditioning operator ($<$ or $\leq$), which is an intrinsic property of the implementations. 
+\item \emph{Commonality of susceptible attributes}: The attributes susceptible to the bias are prevalent in practical scenarios, with examples including the \emph{age} attribute found in nearly all medical datasets.
+\item \emph{Magnitude of the bias}: The impact of switching the conditioning operator from $<$ to $\leq$ (or vice versa) in trees, indicating the size of the bias, can be substantial, reaching up to 1.5-2 percentage points in AUC and $r^2$ scores, with statistical significance. 
+\item \emph{Efficient elimination of the bias}: The bias can be easily mitigated by incorporating predictions from both conditioning operators; alternatively, in low or no-code environments, using models trained on mirrored training vectors.
+\item \emph{Free lunch improvement for random forests}: In the case of random forests, eliminating the bias by training half of the trees on mirrored data incurs no additional computational cost, representing a 'free lunch' improvement.
+\end{itemize}
+
+We believe this research is an important contribution to the literature: Given the widespread use of decision trees and random forests across various domains, raising awareness of an easily eliminable bias that could cause up to a 2 percentage point decrease in performance has the potential to enhance numerous applications.
+
+\section{The evidences supporting the claim}
+
+\begin{quote}
+    "What is the evidence you provide to support your claim? Be precise."
+\end{quote}
+
+We conducted extensive experiments involving 20 regression and 20 classification datasets, employing both decision trees and random forests. To ensure robustness and statistical significance, all experiments were performed using 400 iterations of 5-fold cross-validation, surpassing the standard practices in the field.
+
+The evidences supporting our claims:
+\begin{itemize}
+\item Thresholds coinciding with feature domain values set the stage for the bias to manifest. In the tests we found that in single decision trees, thresholds align with domain values in 30\% of the cases, while in random forests, this occurs in 87\% of the models. On average, approximately 10\% of nodes have thresholds aligned with domain values.
+\item In the majority of the cases, the predictive performance of both decision trees and random forests, in both classification and regression problems depends on the choice of conditioning operator, which is the manifestation of the bias. The variation in performance resulting from changing the conditioning operator can reach up to 2 percentage points, with statistical significance.
+\item The proposed method of integrating out the dependence on the conditioning operator effectively eliminates the risk of performance deterioration. Across all cases, the performance of the proposed method is statistically significantly better than or equivalent to that of the worst-performing conditioning operator. Performance improvements of up to 1.5 percentage points were observed.
+\end{itemize}
+
+\section{Related papers}
+
+\begin{quote}
+    "What papers by other authors make the most closely related contributions, and how is your paper related to them?"
+\end{quote}
+
+Based on our best knowledge, there are no existing papers specifically addressing the bias inherent in CART-type decision trees when applied to features with small, equidistant domains. However, there are related studies that discuss different biases, such as the selection bias \cite{bias0, bias1, bias2}. These studies typically focus on impurity measures in classification tasks, which tend to favor attributes with larger domains and assign them higher importance.
+
+\section{Previously published parts}
+
+\begin{quote}
+    "Have you published parts of your paper before, for instance in a conference? If so, give details of your previous paper(s) and a precise statement detailing how your paper provides a significant contribution beyond the previous paper(s)."
+\end{quote}
+
+No parts of the paper have been published in scientific journals or conferences before, except an educational blogpost on Medium.com (\url{https://medium.com/towards-data-science/a-subtle-bias-that-could-impact-your-decision-trees-and-random-forests-3480756f7552}), which contains a high level investigation of the problem on one single dataset, which is definitely not a comprehensive scientific study.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

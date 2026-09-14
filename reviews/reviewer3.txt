@@ -1,0 +1,13 @@
+The paper analyzes the bias that is created in decision trees by the design decision of using a "greater or equal" than or "greater than" operator. The choice of one or the other operator can change the decision of an example when the threshold is an existing value. This can occur specially for discrete attributes. The paper shows that this bias happens more than one would expect. In addition, the paper shows that using one operator or the other could affect with statistical significance the performance of the decision tree or random forest. Then the paper also proposes a way to avoid the bias by averaging two equal, if possible, trees (one this the <= operator and the other with <). The results show that the proposed method is never significantly worse than both operators when used individually and it is more times significantly better than worse.
+
+The paper is very well posed for an idea that seems marginal although the paper shows that the proposed idea reduces the risk for _free_. In any case, the differences are small.
+
+I have some suggestions and typos:
+* It is said that CART assumes all features being continuous but it is not true. The original implementation handles categorical attributes by grouping them into two groups of labels. CART also is able to generate oblique splits.
+* it is unclear how the aggregation of the two trees is carried out. For regression I guess it is just averaging of the outputs but for classification what is the output if each trees gives a different class? Please, clarify.
+* The article  says that the proposed method "can be expected to yield predictions at least as good as those produced by the conditioning operator with the worse performance." which seems not too ambitious. Is there no way to be able to select the best operator?
+* The example of page 9 (x = (self-employment : 0, dependents : 3, income : 50k)), if I am not mistaken, goes to the other side in the root node  as self-employed=0, isn't it? There is also a typo in self-employment instead of of self-employed.
+* In Fig 3 there is a typo, it is said -60k instead of -70k
+* Page 12, it is unclear this "Model selection was carried out individually for each dataset using 20 times repeated 5-fold cross-validation and maximizing the ROC AUC score". It is unclear if  these hyperparams are selected on the whole dataset or on training?Wouldn't that be overfitting?
+* Table 1 shows sometimes alpha, and sometimes beta but not both, why?
+* Finally, I suggest to do a final analysis to show the performance of the models for only the instances that actually hit at least one biased node with the threshold value. Also the percentage of instances that hit these nodes for each dataset would be of interest

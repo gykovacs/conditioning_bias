@@ -1,0 +1,22 @@
+The authors examine the bias introduced by the conditioning operator in decision (classification and regression) trees, which is an inherent trait of implementations. This “bias” is most pronounced when certain features are drawn from a small and uniformly spaced domain. They introduce methods to mitigate this „bias“, which involve an extra prediction step for decision trees but do not incur any additional cost for random forests. By analyzing 20 classification and 20 regression datasets, they demonstrate that this bias can cause statistically significant variations in AUC and r2 scores.
+
+Plus:
+-	The “mirroring trick” is creative and clever.
+-	Discovery of a tiny difference in predictive performance when the conditioning operator is modified.
+-	Nice code repository. Transparent and easy to understand and run.
+
+To be Improved:
+-	The paper can and should be shortened substantially! The text is written in a very long-winded, overly verbose and redundant fashion. I feel that the authors repeat themselves quite often. The idea is so simple that it could be described on half or a third of the space. 
+-	Similarly: the paper almost positions itself as a review paper on trees in machine learning which leads to a large number of references. Not clear this is necessary.
+-	Generally speaking, the authors use rather aggrandizing language overstating the magnitude of the effect and the impact of their findings. This could be toned down quite a bit.
+-	I would like to see a discussion on why the bootstrapping of many trees in RF does not automatically lead to an effective averaging of the conditioning.
+-	The authors really need to add simulated data to their benchmarking! That would have the advantage of an unlimited test set size and less speculation on how the trees would fare on the “full data”. 
+-	The main results (Table 2) should not be in the Appendix but moved to the main text!
+-	Table 2:
+o	The columns aucd and rd2 contain the differences of mean performance scores in absolute numbers whereas the text often cites relative percentage numbers which the reader cannot identify. Either add columns with relative measures or change the absolute ones to relative ones. 
+o	Along the same lines: the absolute improvements are incredibly tiny (often 10 to the minus 4 or 5), so it is actually hard to believe that the relative changes would be of the order of one percent!
+o	The table contains about as many negative as positive changes (to be expected), so the case to the user to use the averaged conditioning seems less convincing? (“There is a 50% chance that using the averaging might help performance in a small way.”)
+-	My main problem with this paper is the miniscule size of the effect which in practice will be negligible. The ONLY reason such small effect size could lead to statistical significance is the unusually large number (400!) of repeated runs of the CV routine. In fact, ANY tiny effect can be made statistically significant by choosing that number arbitrarily high. 
+
+Overall, this paper points out a mildly interesting difference in predictive performance when changing the conditioning operator. It is somewhat surprising that this went unnoticed until now. These results should be published somewhere but do not offer enough new insight and merit to justify publication in the highly competitive Machine Learning journal.
+
